@@ -8,7 +8,6 @@ const sequelize = new Sequelize(dbConfig.DATABASE, dbConfig.USER, dbConfig.PASSW
 
 const db = {};
 db.sequelize = sequelize;
-db.model = {}
-db.model.User = require('./user')(sequelize, Sequelize.DataTypes);
+db.Sequelize = Sequelize;
 
 module.exports = db;

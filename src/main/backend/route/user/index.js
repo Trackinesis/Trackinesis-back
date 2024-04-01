@@ -5,8 +5,8 @@ router.get('/', (req, res) => {
     res.send('<h1>This is all the posts!</h1>');
 });
 
-router.get('/most-popular', (req, res) => {
+router.get('/userPage', (req, res) => {
     res.send("<h1>This is the most popular post!</h1>");
-})
+});
 
 module.exports = router;

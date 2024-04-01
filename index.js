@@ -2,20 +2,28 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const db = require('./src/main/backend/model');
+const session = require('express-session')
 
 const users = require('./src/main/backend/route/user');
 const posts = require('./src/main/backend/route/post');
 const login = require('./src/main/backend/route/login');
-const {DATABASE} = require("./src/main/backend/config/db-config");
+const logout = require('./src/main/backend/route/logout');
+const cors = require("cors");
 
+app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json());
-
-app.use(express.urlencoded({extended: true}));
+app.use(session({
+    secret: 'secret',
+    cookie: {
+        sameSite: 'strict',
+    }
+}));
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/user', users);
 app.use('/post', posts);
-app.use('/login', login);
-
+app.use('/', login);
+app.use('/logout', logout);
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
@@ -26,20 +34,68 @@ app.set('views', path.join(__dirname, 'views'));
     await db.sequelize.sync();
 })();
 
-app.use((req, res, next) => {
-    console.log(new Date().toLocaleDateString());
-    next();
-})
+const Signup = require('./src/main/backend/model/signup');
+const User = require('./src/main/backend/model/user');
 
-app.get('/', [
-    (req, res, next) => {
-        res.send('This is the home page!')
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await Signup.findOne({
+            where: {
+                email: email,
+                password: password
+            }
+        });
+        if (user) {
+            console.log(req.json);
+            req.session.user = user;
+            req.session.authorized = true;
+            return res.redirect('/home');
+        } else {
+            return res.send('Fail');
+        }
+    } catch (error) {
+        console.error('Error while searching in the database.', error);
+        return res.send('Error while searching in the database.');
     }
-]);
-
-app.use(function (request, response, next) {
-    console.log('This is global middleware');
-    next();
 });
 
-app.listen(1234);
+app.post('/signup', async (req, res) => {
+    try {
+        console.log(req.body.name);
+        await Signup.create({
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password
+        });
+        return res.json("User created successfully");
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(400).json(error);
+    }
+});
+
+app.post('/signupsteptwo', async (req, res) => {
+    try {
+        await User.create({
+            age: req.body.age,
+            weight: req.body.weight,
+            height: req.body.height,
+            gender: req.body.gender
+        });
+        return res.json("Profile created successfully");
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating profile");
+    }
+});
+
+app.get('/home', (req, res) => {
+    res.send('Welcome to the home page');
+});
+
+app.listen(8081, () => {
+    console.log('Server is running on port 8081');
+});

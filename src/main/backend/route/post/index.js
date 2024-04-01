@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.send('<h1>This is all the users!</h1>');
+    console.log(req.cookies);
+    res.send('This is all the users!');
 });
 
-router.get('/:username', (req, res) => {
-    res.send("<h1>This is Trackinesis's profile!</h1>");
-})
+router.get('/userpage', (req, res) => {
+    console.log(req.cookies);
+    res.send("This is Trackinesis's profile!");
+});
 
 module.exports = router;

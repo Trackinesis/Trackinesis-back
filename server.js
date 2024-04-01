@@ -29,7 +29,7 @@ const db = mysql.createConnection({
     database: "trackinesis"
 })
 
-app.post('/signup', (req, res) => {
+app.post('/signup.js', (req, res) => {
     console.log(req.body)
     const sql = "INSERT INTO `login` (`first_name`, `last_name`, `email`, `password`) VALUES (?)";
     const values = [

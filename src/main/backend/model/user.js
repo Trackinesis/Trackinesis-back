@@ -1,14 +1,23 @@
-const { sequelize } = require(".");
+const { DataTypes } = require('sequelize');
+const db = require('./index');
 
-module.exports = (sequelize, DataTypes) => {
+const User = db.sequelize.define('user', {
+    age: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    weight: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    height: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    gender: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+});
 
-    const User = sequelize.define('user', {
-        username: DataTypes.STRING,
-        password: DataTypes.STRING
-    }, {
-        freezeTableName: true
-    });
-
-    return User;
-
-};
+module.exports = User;

@@ -1,7 +1,7 @@
 module.exports = {
     HOST: 'localhost',
     USER: 'root',
-    PASSWORD: '',
+    PASSWORD: 'rootpassword',
     DATABASE: 'trackinesis',
     DIALECT: 'mysql'
 }
