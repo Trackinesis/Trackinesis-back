@@ -15,11 +15,11 @@ module.exports = {
             res.json({ message: 'User created successfully' });
         }
         else {
-            res.status(400).json({ error: 'Faltan campos requeridos' });
+            res.status(400).json({ error: 'Required fields are missing.' });
         }
     },
 
     login: async (req, res) => {
-        res.status(404).json({ error: 'No se ha implementado la función de inicio de sesión para los usuarios' });
+        res.status(404).json({ error: 'The user login function has not been implemented.' });
     }
 };

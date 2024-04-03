@@ -4,9 +4,9 @@ const { user } = require('../../controller');
 
 router.get('/', (req, res) => {
     if (req.session.authorized) {
-        res.render('profile', { username: req.session.user.username });
+        res.send('Access granted');
     } else {
-        res.render('login');
+        res.send('Access denied');
     }
 });
 

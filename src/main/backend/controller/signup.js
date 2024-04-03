@@ -13,7 +13,6 @@ module.exports = {
             });
 
             res.cookie('name', name, { secure: true });
-            res.render('profile', { name });
         }
         else {
             res.send('Not added to the database!');
@@ -31,7 +30,6 @@ module.exports = {
             if (user) {
                 req.session.user = user;
                 req.session.authorized = true;
-                res.render('profile', {name: name});
             }
             else {
                 res.render('signup');

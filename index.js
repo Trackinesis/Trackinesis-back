@@ -47,7 +47,6 @@ app.post('/login', async (req, res) => {
             }
         });
         if (user) {
-            console.log(req.json);
             req.session.user = user;
             req.session.authorized = true;
             return res.redirect('/home');
@@ -62,7 +61,6 @@ app.post('/login', async (req, res) => {
 
 app.post('/signup', async (req, res) => {
     try {
-        console.log(req.body.name);
         await Signup.create({
             name: req.body.name,
             email: req.body.email,

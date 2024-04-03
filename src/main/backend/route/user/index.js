@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.send('<h1>This is all the posts!</h1>');
+    res.send('This is all the posts!');
 });
 
-router.get('/userPage', (req, res) => {
-    res.send("<h1>This is the most popular post!</h1>");
+router.get('/userpage', (req, res) => {
+    res.send("This is the most popular post!");
 });
 
 module.exports = router;

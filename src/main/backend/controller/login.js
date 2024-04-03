@@ -4,7 +4,7 @@ module.exports = {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.send('Por favor, ingrese su correo electrónico y contraseña.');
+            return res.send('Please enter your email address and password.');
         }
 
         try {
@@ -18,12 +18,12 @@ module.exports = {
                 return req.json('Success');
             }
             else {
-                return res.send('Credenciales incorrectas. No se encontró ningún usuario con ese correo electrónico y contraseña.');
+                return res.send('Incorrect credentials. No user was found with that email address and password.');
             }
         }
         catch (error) {
-            console.error('Error al buscar en la base de datos:', error);
-            return res.send('Error al buscar en la base de datos.');
+            console.error('Error while searching the database:', error);
+            return res.send('Error while searching the database.');
         }
     }
 };
