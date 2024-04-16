@@ -8,9 +8,9 @@ const users = require('./src/main/backend/route/user');
 const posts = require('./src/main/backend/route/post');
 const login = require('./src/main/backend/route/login');
 const logout = require('./src/main/backend/route/logout');
-const cors = require("cors");
+const cors = require('cors');
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({origin: 'http://localhost:3000'}));
 app.use(express.json());
 app.use(session({
     secret: 'secret',
@@ -18,7 +18,7 @@ app.use(session({
         sameSite: 'strict',
     }
 }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 app.use('/user', users);
 app.use('/post', posts);
@@ -27,11 +27,15 @@ app.use('/logout', logout);
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
 
 (async () => {
-    await db.sequelize.sync();
+    await db.sequelize.sync()
+        .then(() => {
+        console.log('Models synchronized successfully with the database.');
+    })
+        .catch(error => {
+            console.error('Error synchronizing models:', error);
+        });
 })();
 
 const Signup = require('./src/main/backend/model/signup');
@@ -39,7 +43,7 @@ const User = require('./src/main/backend/model/user');
 
 app.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const {email, password} = req.body;
         const user = await Signup.findOne({
             where: {
                 email: email,
@@ -61,30 +65,48 @@ app.post('/login', async (req, res) => {
 
 app.post('/signup', async (req, res) => {
     try {
+        const user = await User.create( )
+        console.log(user)
         await Signup.create({
             name: req.body.name,
             email: req.body.email,
-            password: req.body.password
+            password: req.body.password,
+            userId: user.id
         });
-        return res.json("User created successfully");
-    }
-    catch (error) {
+        return res.json({ id: user.id });
+    } catch (error) {
         console.error(error);
         return res.status(400).json(error);
     }
 });
 
+
 app.post('/signupsteptwo', async (req, res) => {
     try {
-        await User.create({
-            age: req.body.age,
-            weight: req.body.weight,
-            height: req.body.height,
-            gender: req.body.gender
-        });
-        return res.json("Profile created successfully");
-    }
-    catch (error) {
+        const userId = req.body.userId;
+        console.log(userId);
+
+        if (!userId) {
+            return res.status(400).json("No valid user ID provided.");
+        }
+
+        const [numRowsUpdated] = await User.update(
+            {
+                age: req.body.age,
+                weight: req.body.weight,
+                height: req.body.height,
+                gender: req.body.gender
+            },
+            { where: { id: userId } }
+        );
+
+        if (numRowsUpdated === 1) {
+            return res.json("Profile created successfully");
+        }
+        else {
+            return res.status(400).json("User not found for update.");
+        }
+    } catch (error) {
         console.error(error);
         return res.status(400).json("Error creating profile");
     }
