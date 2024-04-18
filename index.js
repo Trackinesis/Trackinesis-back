@@ -5,7 +5,6 @@ const db = require('./src/main/backend/model');
 const session = require('express-session')
 
 const users = require('./src/main/backend/route/user');
-const posts = require('./src/main/backend/route/post');
 const login = require('./src/main/backend/route/login');
 const logout = require('./src/main/backend/route/logout');
 const cors = require('cors');
@@ -20,8 +19,7 @@ app.use(session({
 }));
 app.use(express.urlencoded({extended: true}));
 
-app.use('/user', users);
-app.use('/post', posts);
+app.use('/api/user', users);
 app.use('/', login);
 app.use('/logout', logout);
 
@@ -65,7 +63,7 @@ app.post('/login', async (req, res) => {
 
 app.post('/signup', async (req, res) => {
     try {
-        const user = await User.create( )
+        const user = await User.create()
         console.log(user)
         await Signup.create({
             name: req.body.name,

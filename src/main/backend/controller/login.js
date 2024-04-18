@@ -1,29 +1,21 @@
-const Login = require('../model/signup');
+const User = require('../model/user');
+
 module.exports = {
-    create: async (req, res) => {
+    login: async (req, res) => {
         const { email, password } = req.body;
 
-        if (!email || !password) {
-            return res.send('Please enter your email address and password.');
-        }
-
         try {
-            let user = await Login.findOne({
-                where: { email, password }
-            });
+            const user = await User.findOne({ where: { email, password } });
 
             if (user) {
-                req.session.user = user;
-                req.session.authorized = true;
-                return req.json('Success');
+                req.session.user = { username: user.username };
+                return res.json({ message: 'Login successful' });
+            } else {
+                return res.status(401).json({ error: 'Incorrect email or password' });
             }
-            else {
-                return res.send('Incorrect credentials. No user was found with that email address and password.');
-            }
-        }
-        catch (error) {
-            console.error('Error while searching the database:', error);
-            return res.send('Error while searching the database.');
+        } catch (error) {
+            console.error('Error logging in:', error);
+            return res.status(500).json({ error: 'Internal server error' });
         }
     }
 };
