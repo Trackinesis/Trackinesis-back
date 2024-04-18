@@ -13,7 +13,7 @@ exports.signUp = async (req, res) => {
     if (existingUser) {
         return res.status(400).json({message: 'User already exists'});
     }
-    const user = await User.create( )
+    const user = await User.create()
 
     await Signup.create({
         name,
