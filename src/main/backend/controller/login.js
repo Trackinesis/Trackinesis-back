@@ -1,21 +1,29 @@
-const User = require('../model/user');
+const jwt = require('jsonwebtoken');
+const SignupTable = require('../model/signup');
 
-module.exports = {
-    login: async (req, res) => {
-        const { email, password } = req.body;
+const expirationTime = '1h';
 
-        try {
-            const user = await User.findOne({ where: { email, password } });
-
-            if (user) {
-                req.session.user = { username: user.username };
-                return res.json({ message: 'Login successful' });
-            } else {
-                return res.status(401).json({ error: 'Incorrect email or password' });
-            }
-        } catch (error) {
-            console.error('Error logging in:', error);
-            return res.status(500).json({ error: 'Internal server error' });
-        }
+exports.login = async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Please enter your email address and password.' });
     }
-};
+
+
+    let findUser = await SignupTable.findOne({
+        where: { email, password }
+    });
+    if (!findUser) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+    try {
+        const token = jwt.sign({ id: findUser.id },
+            process.env.USER, {
+                expiresIn: expirationTime
+            });
+        res.status(200).json({ message: 'User logged in successfully', token: token });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}

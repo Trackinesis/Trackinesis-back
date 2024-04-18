@@ -27,7 +27,7 @@ const Signup = db.sequelize.define('signup', {
         allowNull: false,
         unique: true,
         references: {
-            model: User,
+            model: User, //pointer to another table
             key: 'id'
         }
     }
