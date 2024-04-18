@@ -87,6 +87,7 @@ app.post('/signupsteptwo', async (req, res) => {
         console.log(userId);
 
         if (!userId) {
+
             return res.status(400).json("No valid user ID provided.");
         }
 
