@@ -39,6 +39,7 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
 
 const Signup = require('./src/main/backend/models/signup');
 const User = require('./src/main/backend/models/user');
+const Exercise = require('./src/main/backend/models/exercise');
 
 app.post('/login', async (req, res) => {
     try {
@@ -128,6 +129,19 @@ app.post('/addRoutine', async (req, res) => {
     }
 });
 
+app.post('/addexercise', async (req, res) => {
+    try {
+        await Exercise.create({
+            name: req.body.name,
+            type: req.body.type,
+            description: req.body.description
+        });
+        return res.json("Exercise created successfully");
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating exercise");
+    }
+});
 
 app.get('/home', (req, res) => {
     res.send('Welcome to the home page');

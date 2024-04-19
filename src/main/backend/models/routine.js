@@ -1,27 +1,27 @@
-const Sequelize = require('sequelize');
+const DataTypes = require('sequelize');
 const db = require('./index');
 
 const Routine = db.sequelize.define('routine', {
     id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
     name: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false
     },
     type: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false
     },
     code: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: true,
         unique: true
     },
     objective: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: true
     }
     

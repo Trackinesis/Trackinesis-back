@@ -1,4 +1,4 @@
-const Exercise = require('../models/exercise');
+const Exercise = require('../../../../migrations/createExercisesTable');
 
 exports.createExercise = async (req, res) => {
     const { name, type } = req.body;

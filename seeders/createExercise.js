@@ -37,10 +37,10 @@ module.exports = {
             { name: 'Decline Bench Press', type: 'Chest', createdAt: new Date(), updatedAt: new Date() },
             // Agrega más ejercicios aquí si es necesario
         ];
-        return queryInterface.bulkInsert('Exercises', exercises, {});
+        return queryInterface.bulkInsert('exercises', exercises, {});
     },
 
     down: async (queryInterface, Sequelize) => {
-        return queryInterface.bulkDelete('Exercises', null, {});
+        return queryInterface.bulkDelete('exercises', null, {});
     }
 };
