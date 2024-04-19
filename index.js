@@ -131,7 +131,6 @@ app.post('/addRoutine', async (req, res) => {
     }
 });
 
-a
 
 app.get('/home', (req, res) => {
     res.send('Welcome to the home page');
