@@ -8,6 +8,7 @@ const users = require('./src/main/backend/route/user');
 const posts = require('./src/main/backend/route/post');
 const login = require('./src/main/backend/route/login');
 const logout = require('./src/main/backend/route/logout');
+const exercise = require('./src/main/backend/route/exercise');
 const cors = require('cors');
 
 app.use(cors({origin: 'http://localhost:3000'}));
@@ -24,6 +25,7 @@ app.use('/user', users);
 app.use('/post', posts);
 app.use('/', login);
 app.use('/logout', logout);
+app.use('/exercise', exercise);
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
@@ -112,6 +114,24 @@ app.post('/signupsteptwo', async (req, res) => {
         return res.status(400).json("Error creating profile");
     }
 });
+
+
+app.post('/addRoutine', async (req, res) => {
+    try {
+        await Routine.create({
+            name: req.body.name,
+            type: req.body.type,
+            code: req.body.code,
+            objective: req.body.objective
+        });
+        return res.json("Routine created successfully");
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating routine");
+    }
+});
+
+a
 
 app.get('/home', (req, res) => {
     res.send('Welcome to the home page');
