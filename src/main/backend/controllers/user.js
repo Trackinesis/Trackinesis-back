@@ -1,24 +1,6 @@
-const User = require('../model/user');
+const User = require('../models/user');
 
 module.exports = {
-    create: async (req, res) => {
-        if (req.body.age && req.body.weight && req.body.height && req.body.gender) {
-            const { age, weight, height, gender } = req.body;
-
-            await User.create({
-                age,
-                weight,
-                height,
-                gender
-            });
-
-            res.json({ message: 'User created successfully' });
-        }
-        else {
-            res.status(400).json({ error: 'Required fields are missing.' });
-        }
-    },
-
     getUsername: async (req, res) => {
         try {
             const { username } = req.session.user;

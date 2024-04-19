@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
-const Signup  = require('../model/signup');
-const {USER} = require("../config/dbConfig");
-const User = require('../model/user')
+const Signup  = require('../models/signup');
+const User = require('../models/user')
 
 const expirationTime = '1h';
 
@@ -23,7 +22,7 @@ exports.signUp = async (req, res) => {
     });
     //hacer el token y enviar el token
     try {
-        const token = jwt.sign({id: user.id}, USER, {
+        const token = jwt.sign({id: user.id}, User, {
             expiresIn: expirationTime
         });
         res.status(201).json({message: 'User created successfully', token : token}) //atajo este json en el front

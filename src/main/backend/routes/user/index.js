@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../../controller/user');
+const userController = require('../../controllers/user');
 
 router.get('/:username', (req, res) => {
     if (req.session.user && req.session.user.username) {

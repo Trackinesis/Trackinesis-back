@@ -1,12 +1,12 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const db = require('./src/main/backend/model');
+const db = require('./src/main/backend/models');
 const session = require('express-session')
 
-const users = require('./src/main/backend/route/user');
-const login = require('./src/main/backend/route/login');
-const logout = require('./src/main/backend/route/logout');
+const users = require('./src/main/backend/routes/user');
+const login = require('./src/main/backend/routes/login');
+const logout = require('./src/main/backend/routes/logout');
 const cors = require('cors');
 
 app.use(cors({origin: 'http://localhost:3000'}));
@@ -22,9 +22,7 @@ app.use(express.urlencoded({extended: true}));
 app.use('/api/user', users);
 app.use('/', login);
 app.use('/logout', logout);
-
 app.use('/static', express.static(path.join(__dirname, 'public')));
-
 
 (async () => {
     await db.sequelize.sync()
@@ -36,8 +34,8 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
         });
 })();
 
-const Signup = require('./src/main/backend/model/signup');
-const User = require('./src/main/backend/model/user');
+const Signup = require('./src/main/backend/models/signup');
+const User = require('./src/main/backend/models/user');
 
 app.post('/login', async (req, res) => {
     try {
