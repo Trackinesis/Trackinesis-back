@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const SignupTable = require('../model/signup');
+const SignupTable = require('../models/signup');
 
 const expirationTime = '1h';
 
