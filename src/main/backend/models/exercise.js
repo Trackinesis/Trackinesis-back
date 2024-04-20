@@ -1,16 +1,23 @@
-const DataTypes = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('./index');
+const RoutineExercise = require("./routineExercise");
 
 const Exercise = db.sequelize.define('exercise', {
-    id: {
-        allowNull: false,
-        autoIncrement: true,
+    exerciseId: {
+        type: DataTypes.INTEGER,
         primaryKey: true,
-        type: DataTypes.INTEGER
+        autoIncrement: true,
+        allowNull: false,
+        unique: true,
+        references: {
+            model: RoutineExercise, //pointer to another table
+            key: 'exerciseId'
+        }
     },
     name: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     type: {
         type: DataTypes.STRING,
@@ -19,16 +26,7 @@ const Exercise = db.sequelize.define('exercise', {
     description: {
         type: DataTypes.STRING,
         allowNull: true
-    },
-    createdAt: {
-        allowNull: false,
-        type: DataTypes.DATE
-    },
-    updatedAt: {
-        allowNull: false,
-        type: DataTypes.DATE
     }
-
 });
 
 module.exports = Exercise;

@@ -1,11 +1,18 @@
-const DataTypes = require('sequelize');
+const { DataTypes } = require('sequelize');
 const db = require('./index');
+const Exercise = require("./exercise");
+const PlanRoutine = require("./planRoutine");
 
 const Routine = db.sequelize.define('routine', {
-    id: {
+    routineId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        unique: true,
+        references: {
+            model: PlanRoutine,
+            key: 'routineId'
+        }
     },
     name: {
         type: DataTypes.STRING,
@@ -15,16 +22,10 @@ const Routine = db.sequelize.define('routine', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    code: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        unique: true
-    },
-    objective: {
+    description: {
         type: DataTypes.STRING,
         allowNull: true
     }
-    
 });
 
 module.exports = Routine;

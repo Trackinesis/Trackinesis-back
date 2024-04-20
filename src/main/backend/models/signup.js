@@ -1,12 +1,19 @@
 const {DataTypes} = require('sequelize');
 const db = require('./index');
 const User = require('./user');
+const Plan = require('./plan')
 
 const Signup = db.sequelize.define('signup', {
-    id: {
+    userId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        allowNull: false,
+        unique: true,
+        references: {
+            model: User,
+            key: 'userId'
+        }
     },
     name: {
         type: DataTypes.STRING,
@@ -21,16 +28,10 @@ const Signup = db.sequelize.define('signup', {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
-    },
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        unique: true,
-        references: {
-            model: User, //pointer to another table
-            key: 'id'
-        }
     }
 });
+
+User.belongsTo(Signup);
+Plan.belongsTo(Signup);
 
 module.exports = Signup;

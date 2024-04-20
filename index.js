@@ -7,7 +7,7 @@ const session = require('express-session')
 const users = require('./src/main/backend/routes/user');
 const login = require('./src/main/backend/routes/login');
 const logout = require('./src/main/backend/routes/logout');
-const exercise = require('./src/main/backend/route/exercise');
+const exercise = require('./src/main/backend/routes/exercise');
 const cors = require('cors');
 
 app.use(cors({origin: 'http://localhost:3000'}));
@@ -40,6 +40,8 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
 const Signup = require('./src/main/backend/models/signup');
 const User = require('./src/main/backend/models/user');
 const Exercise = require('./src/main/backend/models/exercise');
+const ExerciseInfo = require('./src/main/backend/models/exerciseInfo');
+const Routine = require('./src/main/backend/models/routine');
 
 app.post('/login', async (req, res) => {
     try {
@@ -66,7 +68,6 @@ app.post('/login', async (req, res) => {
 app.post('/signup', async (req, res) => {
     try {
         const user = await User.create()
-        console.log(user)
         await Signup.create({
             name: req.body.name,
             email: req.body.email,
@@ -91,8 +92,7 @@ app.post('/signupsteptwo', async (req, res) => {
             return res.status(400).json("No valid user ID provided.");
         }
 
-        const [numRowsUpdated] = await User.update(
-            {
+        const [numRowsUpdatedUser] = await User.update({
                 age: req.body.age,
                 weight: req.body.weight,
                 height: req.body.height,
@@ -101,7 +101,7 @@ app.post('/signupsteptwo', async (req, res) => {
             { where: { id: userId } }
         );
 
-        if (numRowsUpdated === 1) {
+        if (numRowsUpdatedUser === 1) {
             return res.json("Profile created successfully");
         }
         else {
@@ -131,15 +131,46 @@ app.post('/addRoutine', async (req, res) => {
 
 app.post('/addexercise', async (req, res) => {
     try {
+        const exerciseInfo = await ExerciseInfo.create()
         await Exercise.create({
             name: req.body.name,
             type: req.body.type,
-            description: req.body.description
+            description: req.body.description,
+            exerciseId: exerciseInfo.id
         });
         return res.json("Exercise created successfully");
     } catch (error) {
         console.error(error);
         return res.status(400).json("Error creating exercise");
+    }
+});
+
+app.post('/addexerciseinfo', async (req, res) => {
+    try {
+        const exerciseId = req.body.exerciseId;
+
+        if (!exerciseId) {
+
+            return res.status(400).json("No valid exercise ID provided.");
+        }
+
+        const [numRowsUpdatedExercise] = await ExerciseInfo.update({
+                sets: req.body.sets,
+                reps: req.body.reps,
+                time: req.body.timeExercise,
+            },
+            { where: { id: exerciseId } }
+        );
+
+        if (numRowsUpdatedExercise === 1) {
+            return res.json("Exercise created successfully");
+        }
+        else {
+            return res.status(400).json("User not found for update.");
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating profile");
     }
 });
 
