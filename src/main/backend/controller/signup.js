@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
-const Signup  = require('../models/signup');
-const User = require('../models/user')
+const Signup  = require('../model/signup');
+const User = require('../model/user')
 
 const expirationTime = '1h';
 
-exports.signUp = async (req, res) => {
+exports.createUser = async (req, res) => {
     const {name, email, password} = req.body;
     let existingUser = await Signup.findOne({
         where: {email}

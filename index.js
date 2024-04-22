@@ -1,12 +1,17 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const db = require('./src/main/backend/models');
+const db = require('./src/main/backend/util/database');
 const session = require('express-session')
 
-const users = require('./src/main/backend/routes/user');
 const login = require('./src/main/backend/routes/login');
 const logout = require('./src/main/backend/routes/logout');
+const signups = require('./src/main/backend/routes/logout');
+const users = require('./src/main/backend/routes/user');
+const plans = require('./src/main/backend/routes/plan');
+const planRoutines = require('./src/main/backend/routes/planRoutine');
+const routines = require('./src/main/backend/routes/routine');
+const routineExercises = require('./src/main/backend/routes/routineExercise');
 const exercise = require('./src/main/backend/routes/exercise');
 const cors = require('cors');
 
@@ -20,28 +25,36 @@ app.use(session({
 }));
 app.use(express.urlencoded({extended: true}));
 
-app.use('/api/user', users);
 app.use('/', login);
 app.use('/logout', logout);
+app.use('/signup', signups);
+app.use('/api/user', users);
+app.use('./plan', plans);
+app.use('./planRoutine', planRoutines);
+app.use('./routine', routines);
+app.use('./routineExercise', routineExercises);
 app.use('/exercise', exercise);
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
 (async () => {
-    await db.sequelize.sync()
-        .then(() => {
+    await db.sync({force: false})
+        .then(async() => {
+            //await db.drop()
         console.log('Models synchronized successfully with the database.');
     })
         .catch(error => {
-            console.error('Error synchronizing models:', error);
+            console.error('Error synchronizing model:', error);
         });
 })();
 
-const Signup = require('./src/main/backend/models/signup');
-const User = require('./src/main/backend/models/user');
-const Exercise = require('./src/main/backend/models/exercise');
-const ExerciseInfo = require('./src/main/backend/models/exerciseInfo');
-const Routine = require('./src/main/backend/models/routine');
+const Signup = require('./src/main/backend/model/signup');
+const User = require('./src/main/backend/model/user');
+const Plan = require('./src/main/backend/model/plan');
+const PlanRoutine = require('./src/main/backend/model/planRoutine')
+const Routine = require('./src/main/backend/model/routine');
+const RoutineExercise = require('./src/main/backend/model/routineExercise');
+const Exercise = require('./src/main/backend/model/exercise');
 
 app.post('/login', async (req, res) => {
     try {
@@ -131,7 +144,7 @@ app.post('/addRoutine', async (req, res) => {
 
 app.post('/addexercise', async (req, res) => {
     try {
-        const exerciseInfo = await ExerciseInfo.create()
+        const exerciseInfo = await RoutineExercise.create()
         await Exercise.create({
             name: req.body.name,
             type: req.body.type,
@@ -154,7 +167,7 @@ app.post('/addexerciseinfo', async (req, res) => {
             return res.status(400).json("No valid exercise ID provided.");
         }
 
-        const [numRowsUpdatedExercise] = await ExerciseInfo.update({
+        const [numRowsUpdatedExercise] = await RoutineExercise.update({
                 sets: req.body.sets,
                 reps: req.body.reps,
                 time: req.body.timeExercise,

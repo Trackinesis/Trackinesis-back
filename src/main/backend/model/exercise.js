@@ -1,18 +1,13 @@
-const { DataTypes } = require('sequelize');
-const db = require('./index');
+const { DataTypes} = require('sequelize');
+const db = require('../util/database');
 const RoutineExercise = require("./routineExercise");
 
-const Exercise = db.sequelize.define('exercise', {
+const Exercise = db.define('exercise', {
     exerciseId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
-        allowNull: false,
-        unique: true,
-        references: {
-            model: RoutineExercise, //pointer to another table
-            key: 'exerciseId'
-        }
+        allowNull: false
     },
     name: {
         type: DataTypes.STRING,
@@ -27,6 +22,10 @@ const Exercise = db.sequelize.define('exercise', {
         type: DataTypes.STRING,
         allowNull: true
     }
+}, {
+    freezeTableName: true
 });
+
+//Exercise.hasMany(RoutineExercise, { foreignKey: 'exerciseId' });
 
 module.exports = Exercise;

@@ -1,13 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const exerciseController = require('../../controller/exercise');
 
-router.get('/addexercise', (req, res) => {
-    if (req.session.authorized) {
-        res.send('Access granted');
-    } else {
-        res.send('Access denied');
-    }
-});
-
+router.post('/createexercise', exerciseController.createExercise);
 
 module.exports = router;

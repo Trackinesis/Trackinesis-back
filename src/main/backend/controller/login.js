@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const SignupTable = require('../models/signup');
+const SignupTable = require('../model/signup');
 
 const expirationTime = '1h';
 
@@ -8,7 +8,6 @@ exports.login = async (req, res) => {
     if (!email || !password) {
         return res.status(400).json({ message: 'Please enter your email address and password.' });
     }
-
 
     let findUser = await SignupTable.findOne({
         where: { email, password }
