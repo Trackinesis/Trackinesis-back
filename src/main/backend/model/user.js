@@ -29,8 +29,8 @@ const User = db.define('user', {
     freezeTableName: true
 });
 
-User.associate = model => {
+/*User.associate = model => {
     User.belongsTo(model.signup, { foreignKey: 'userId' });
-}
+}*/
 
 module.exports = User;

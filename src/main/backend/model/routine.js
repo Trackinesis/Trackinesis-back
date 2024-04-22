@@ -25,6 +25,8 @@ const Routine = db.define('routine', {
     freezeTableName: true
 });
 
-//Routine.hasMany(PlanRoutine, { foreignKey: 'routineId' });
+Routine.associate = model => {
+    Routine.hasMany(model.planRoutine, { foreignKey: 'routineId' });
+}
 
 module.exports = Routine;

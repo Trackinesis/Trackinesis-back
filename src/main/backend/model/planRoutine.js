@@ -14,7 +14,9 @@ const PlanRoutine = db.define('planRoutine', {
     freezeTableName: true
 });
 
-//PlanRoutine.belongsTo(Plan, { foreignKey: 'planId' });
-//PlanRoutine.belongsTo(Routine, { foreignKey: 'routineId' });
+/*PlanRoutine.associate = model => {
+    PlanRoutine.belongsTo(model.plan, { foreignKey: 'planId' });
+    PlanRoutine.belongsTo(model.routine, { foreignKey: 'routineId' });
+}*/
 
 module.exports = PlanRoutine;

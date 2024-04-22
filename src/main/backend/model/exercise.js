@@ -26,6 +26,8 @@ const Exercise = db.define('exercise', {
     freezeTableName: true
 });
 
-//Exercise.hasMany(RoutineExercise, { foreignKey: 'exerciseId' });
+/*Exercise.associate = model => {
+    Exercise.hasMany(model.routineExercise, { foreignKey: 'exerciseId' });
+}*/
 
 module.exports = Exercise;

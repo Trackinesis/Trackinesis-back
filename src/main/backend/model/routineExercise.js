@@ -26,9 +26,9 @@ const RoutineExercise = db.define('routineExercise', {
     freezeTableName: true
 });
 
-RoutineExercise.associate = model => {
+/*RoutineExercise.associate = model => {
     RoutineExercise.belongsTo(model.routine, { foreignKey: 'routineId' });
     RoutineExercise.belongsTo(model.exercise, { foreignKey: 'exerciseId' });
-}
+}*/
 
 module.exports = RoutineExercise;

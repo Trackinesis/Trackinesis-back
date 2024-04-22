@@ -30,7 +30,9 @@ const Plan = db.define('plan', {
     freezeTableName: true
 });
 
-//Plan.belongsTo(Signup, { foreignKey: 'userId' });
-//Plan.hasMany(PlanRoutine, { foreignKey: 'planId' });
+/*Plan.associate = model => {
+    Plan.belongsTo(model.signup, { foreignKey: 'userId' });
+    Plan.hasMany(model.planRoutine, { foreignKey: 'planId' });
+}*/
 
 module.exports = Plan;

@@ -28,9 +28,9 @@ const Signup = db.define('signup', {
     freezeTableName: true
 });
 
-Signup.associate = model => {
+/*Signup.associate = model => {
     Signup.hasOne(model.user, { foreignKey: 'userId' });
     Signup.hasMany(model.plan, { foreignKey: 'userId' });
-};
+};*/
 
 module.exports = Signup;
