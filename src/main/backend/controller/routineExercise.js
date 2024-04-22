@@ -1,10 +1,10 @@
 const RoutineExercise = require('../model/routineExercise');
 
 exports.createRoutineExercise = async (req, res) => {
-    const { routineId, exerciseId, sets, reps, timeExercise } = req.body;
+    const { name, sets, reps, weight, duration } = req.body;
 
     try {
-        const routineExercise = await RoutineExercise.create({ routineId, exerciseId, sets, reps, timeExercise });
+        const routineExercise = await RoutineExercise.create({ name, sets, reps, weight, duration });
         return res.status(201).json({ message: 'RoutineExercise created successfully', routineExercise });
     } catch (error) {
         console.error('Error creating RoutineExercise:', error);

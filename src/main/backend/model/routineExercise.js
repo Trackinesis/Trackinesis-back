@@ -10,17 +10,25 @@ const RoutineExercise = db.define('routineExercise', {
         primaryKey: true,
         allowNull: false
     },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     sets: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     reps: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
-    timeExercise: {
+    weight: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
+    },
+    duration: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     }
 }, {
     freezeTableName: true

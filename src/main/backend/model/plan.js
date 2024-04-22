@@ -10,12 +10,8 @@ const Plan = db.define('plan', {
         primaryKey: true,
         allowNull: false
     },
-    startDate: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    endDate: {
-        type: DataTypes.DATE,
+    name: {
+        type: DataTypes.STRING,
         allowNull: false
     },
     description: {
@@ -25,6 +21,14 @@ const Plan = db.define('plan', {
     objective: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    startDate: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    endDate: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 }, {
     freezeTableName: true

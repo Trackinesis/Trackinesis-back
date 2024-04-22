@@ -1,11 +1,10 @@
 const Plan = require('../model/plan');
 
 exports.createPlan = async (req, res) => {
-    const { startDate, endDate, description, objective } = req.body;
-    const { userId } = req.session.user;
+    const { name, description, objective, startDate, endDate } = req.body;
 
     try {
-        const plan = await Plan.create({ startDate, endDate, description, objective, userId });
+        const plan = await Plan.create({ name, description, objective, startDate, endDate });
         return res.status(201).json({ message: 'Plan created successfully', plan });
     } catch (error) {
         console.error('Error creating plan:', error);
