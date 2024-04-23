@@ -98,10 +98,12 @@ app.post('/signup', async (req, res) => {
 app.post('/signupsteptwo', async (req, res) => {
     try {
         const userId = req.body.userId;
-        if (!userId) {
+        console.log(userId)
 
+        if (!userId) {
             return res.status(400).json("No valid user ID provided.");
         }
+
         const [numRowsUpdatedUser] = await User.update({
                 age: req.body.age,
                 weight: req.body.weight,

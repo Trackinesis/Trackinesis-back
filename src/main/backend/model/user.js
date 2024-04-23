@@ -3,12 +3,6 @@ const db = require('../util/database');
 const Signup = require("./signup");
 
 const User = db.define('user', {
-    userInfoId: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-        allowNull: false
-    },
     age: {
         type: DataTypes.INTEGER,
         allowNull: true
