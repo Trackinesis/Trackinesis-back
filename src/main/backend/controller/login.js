@@ -1,29 +1,28 @@
-const Login = require('../model/signup');
-module.exports = {
-    create: async (req, res) => {
-        const { email, password } = req.body;
+const jwt = require('jsonwebtoken');
+const SignupTable = require('../model/signup');
 
-        if (!email || !password) {
-            return res.send('Please enter your email address and password.');
-        }
+const expirationTime = '1h';
 
-        try {
-            let user = await Login.findOne({
-                where: { email, password }
-            });
-
-            if (user) {
-                req.session.user = user;
-                req.session.authorized = true;
-                return req.json('Success'); //token
-            }
-            else {
-                return res.send('Incorrect credentials. No user was found with that email address and password.');
-            }
-        }
-        catch (error) {
-            console.error('Error while searching the database:', error);
-            return res.send('Error while searching the database.');
-        }
+exports.login = async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Please enter your email address and password.' });
     }
-};
+
+    let findUser = await SignupTable.findOne({
+        where: { email, password }
+    });
+    if (!findUser) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+    try {
+        const token = jwt.sign({ id: findUser.id },
+            process.env.USER, {
+                expiresIn: expirationTime
+            });
+        res.status(200).json({ message: 'User logged in successfully', token: token });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}

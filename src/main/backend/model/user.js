@@ -1,12 +1,8 @@
 const { DataTypes } = require('sequelize');
-const db = require('./index');
+const db = require('../util/database');
+const Signup = require("./signup");
 
-const User = db.sequelize.define('user', {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
+const User = db.define('user', {
     age: {
         type: DataTypes.INTEGER,
         allowNull: true
@@ -23,6 +19,12 @@ const User = db.sequelize.define('user', {
         type: DataTypes.STRING,
         allowNull: true
     }
+}, {
+    freezeTableName: true
 });
+
+/*User.associate = model => {
+    User.belongsTo(model.signup, { foreignKey: 'userId' });
+}*/
 
 module.exports = User;

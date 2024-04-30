@@ -1,0 +1,47 @@
+{
+  "development": {
+    "username": "root",
+    "password": "rootpassword",
+    "database": "trackinesis",
+    "host": "localhost",
+    "dialect": "mysql",
+    "port": 3306,
+    "logging": false,
+    "models": "models",
+    "seeders": "seeders",
+    "migrations": "migrations",
+    "define": {
+      "timestamps": false
+    }
+  },
+  "test": {
+    "username": "root",
+    "password": "rootpassword",
+    "database": "trackinesis",
+    "host": "localhost",
+    "dialect": "mysql",
+    "port": 3306,
+    "logging": false,
+    "models": "models",
+    "seeders": "seeders",
+    "migrations": "migrations",
+    "define": {
+      "timestamps": false
+    }
+  },
+  "production": {
+    "username": "root",
+    "password": "rootpassword",
+    "database": "trackinesis",
+    "host": "localhost",
+    "dialect": "mysql",
+    "port": 3306,
+    "logging": false,
+    "models": "models",
+    "seeders": "seeders",
+    "migrations": "migrations",
+    "define": {
+      "timestamps": false
+    }
+  }
+}

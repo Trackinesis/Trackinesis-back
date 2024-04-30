@@ -1,13 +1,18 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const db = require('./src/main/backend/model');
+const db = require('./src/main/backend/util/database');
 const session = require('express-session')
 
-const users = require('./src/main/backend/route/user');
-const posts = require('./src/main/backend/route/post');
-const login = require('./src/main/backend/route/login');
-const logout = require('./src/main/backend/route/logout');
+const logins = require('./src/main/backend/routes/login');
+const logouts = require('./src/main/backend/routes/logout');
+const signups = require('./src/main/backend/routes/logout');
+const users = require('./src/main/backend/routes/user');
+const plans = require('./src/main/backend/routes/plan');
+const planRoutines = require('./src/main/backend/routes/planRoutine');
+const routines = require('./src/main/backend/routes/routine');
+const routineExercises = require('./src/main/backend/routes/routineExercise');
+const exercises = require('./src/main/backend/routes/exercise');
 const cors = require('cors');
 
 app.use(cors({origin: 'http://localhost:3000'}));
@@ -20,26 +25,36 @@ app.use(session({
 }));
 app.use(express.urlencoded({extended: true}));
 
-app.use('/user', users);
-app.use('/post', posts);
-app.use('/', login);
-app.use('/logout', logout);
+app.use('/', logins);
+app.use('/logout', logouts);
+app.use('/signup', signups);
+app.use('/api/user', users);
+app.use('./plan', plans);
+app.use('./planRoutine', planRoutines);
+app.use('./routine', routines);
+app.use('./routineExercise', routineExercises);
+app.use('/exercise', exercises);
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
-
 (async () => {
-    await db.sequelize.sync()
-        .then(() => {
+    await db.sync({force: false})
+        .then(async() => {
+            //await db.drop()
         console.log('Models synchronized successfully with the database.');
     })
         .catch(error => {
-            console.error('Error synchronizing models:', error);
+            console.error('Error synchronizing model:', error);
         });
 })();
 
 const Signup = require('./src/main/backend/model/signup');
 const User = require('./src/main/backend/model/user');
+const Plan = require('./src/main/backend/model/plan');
+const PlanRoutine = require('./src/main/backend/model/planRoutine')
+const Routine = require('./src/main/backend/model/routine');
+const RoutineExercise = require('./src/main/backend/model/routineExercise');
+const Exercise = require('./src/main/backend/model/exercise');
 
 app.post('/login', async (req, res) => {
     try {
@@ -65,8 +80,7 @@ app.post('/login', async (req, res) => {
 
 app.post('/signup', async (req, res) => {
     try {
-        const user = await User.create( )
-        console.log(user)
+        const user = await User.create()
         await Signup.create({
             name: req.body.name,
             email: req.body.email,
@@ -84,14 +98,13 @@ app.post('/signup', async (req, res) => {
 app.post('/signupsteptwo', async (req, res) => {
     try {
         const userId = req.body.userId;
-        console.log(userId);
+        console.log(userId)
 
         if (!userId) {
             return res.status(400).json("No valid user ID provided.");
         }
 
-        const [numRowsUpdated] = await User.update(
-            {
+        const [numRowsUpdatedUser] = await User.update({
                 age: req.body.age,
                 weight: req.body.weight,
                 height: req.body.height,
@@ -100,7 +113,7 @@ app.post('/signupsteptwo', async (req, res) => {
             { where: { id: userId } }
         );
 
-        if (numRowsUpdated === 1) {
+        if (numRowsUpdatedUser === 1) {
             return res.json("Profile created successfully");
         }
         else {
@@ -109,6 +122,77 @@ app.post('/signupsteptwo', async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(400).json("Error creating profile");
+    }
+});
+
+app.post('/plan', async (req, res) => {
+    try {
+        await Plan.create({
+            name: req.body.name,
+            type: req.body.type,
+            description: req.body.description,
+            objective: req.body.objective,
+            startDate: req.body.startDate,
+            endDate: req.body.endDate
+        });
+        return res.json("Plan created successfully");
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating plan");
+    }
+});
+
+app.post('/routine', async (req, res) => {
+    try {
+        await Routine.create({
+            name: req.body.name,
+            type: req.body.type,
+            description: req.body.description
+        });
+        return res.json("Routine created successfully");
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating routine");
+    }
+});
+
+app.post('/exercise', async (req, res) => {
+    try {
+        await Exercise.create({
+            name: req.body.name,
+            type: req.body.type,
+            description: req.body.description
+        });
+        return res.json("Exercise created successfully");
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating exercise");
+    }
+});
+
+app.get('/exercise', async (req, res) => {
+    try {
+        const exercises = await Exercise.findAll();
+        res.json(exercises);
+    } catch (error) {
+        console.error('Error fetching exercises:', error);
+        res.status(500).json({ message: 'Error fetching exercises' });
+    }
+});
+
+app.post('/routineExercise', async (req, res) => {
+    try {
+        await RoutineExercise.create({
+            name: req.body.name,
+            sets: req.body.sets,
+            reps: req.body.reps,
+            weight: req.body.weight,
+            duration: req.body.duration
+        });
+        return res.json("Exercise created successfully");
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating exercise");
     }
 });
 
