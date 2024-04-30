@@ -15,7 +15,7 @@ module.exports = {
             if (user) {
                 req.session.user = user;
                 req.session.authorized = true;
-                return req.json('Success');
+                return req.json('Success'); //token
             }
             else {
                 return res.send('Incorrect credentials. No user was found with that email address and password.');
