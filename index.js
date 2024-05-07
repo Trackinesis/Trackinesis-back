@@ -142,6 +142,16 @@ app.post('/plan', async (req, res) => {
     }
 });
 
+app.get('/plan', async (req, res) => {
+    try {
+        const plans = await Plan.findAll();
+        res.json(plans);
+    } catch (error) {
+        console.error('Error fetching plans:', error);
+        res.status(500).json({ message: 'Error fetching plans' });
+    }
+});
+
 app.post('/routine', async (req, res) => {
     try {
         await Routine.create({
@@ -203,3 +213,4 @@ app.get('/home', (req, res) => {
 app.listen(8081, () => {
     console.log('Server is running on port 8081');
 });
+
