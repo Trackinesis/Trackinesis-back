@@ -1,7 +1,7 @@
 const {DataType } = require('sequelize');
-const sequelize = require('../db');
+const db = require('../util/database');
 
-const Goal = sequelize.define('Goal', {
+const Goal = db.define('Goal', {
     id: {
         type: DataType.INTEGER,
         primaryKey: true,
@@ -18,3 +18,5 @@ const Goal = sequelize.define('Goal', {
 
 
 });
+
+module.exports = Goal;

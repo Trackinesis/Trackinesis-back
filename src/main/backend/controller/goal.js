@@ -18,7 +18,7 @@ exports.getAllGoals = async (req, res) => {
     }
 };
 
-exports.getGoal = async (req, res) => {
+exports.getGoalById = async (req, res) => {
     try {
         const goal = await Goal.findByPk(req.params.id);
         if (!goal) {
