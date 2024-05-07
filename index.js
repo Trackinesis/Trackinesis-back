@@ -48,6 +48,7 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
         });
 })();
 
+const Models = require('./src/main/backend/model/index')
 const Signup = require('./src/main/backend/model/signup');
 const User = require('./src/main/backend/model/user');
 const Plan = require('./src/main/backend/model/plan');
@@ -94,6 +95,28 @@ app.post('/signup', async (req, res) => {
     }
 });
 
+app.delete('/signup/:userId', async (req, res) => { // Cambio en la ruta para recibir el userId como parámetro de la URL
+    const userId = req.params.userId;
+    try {
+        const deletedUser = await Signup.findOne({
+            where: {
+                userId: userId
+            }
+        });
+        if (!deletedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        await Signup.destroy({
+            where: {
+                userId: userId
+            }
+        });
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 app.post('/signupsteptwo', async (req, res) => {
     try {
@@ -163,6 +186,39 @@ app.post('/routine', async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(400).json("Error creating routine");
+    }
+});
+
+app.get('/routine', async (req, res) => {
+    try {
+        const routines = await Routine.findAll();
+        res.json(routines);
+    } catch (error) {
+        console.error('Error fetching routines:', error);
+        res.status(500).json({ message: 'Error fetching routines' });
+    }
+});
+
+app.delete('/routine/:routineId', async (req, res) => { // Cambio en la ruta para recibir el userId como parámetro de la URL
+    const routineId = req.params.routineId;
+    try {
+        const deletedUser = await Routine.findOne({
+            where: {
+                routineId: routineId
+            }
+        });
+        if (!deletedUser) {
+            return res.status(404).json({ message: 'Routine not found' });
+        }
+        await Routine.destroy({
+            where: {
+                routineId: routineId
+            }
+        });
+        res.status(200).json({ message: 'Routine deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
