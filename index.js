@@ -182,11 +182,11 @@ app.delete('/plan/:planId', async (req, res) => {
     }
 });
 
-
-app.post('/routine', async (req, res) => {
+app.post('/createroutine', async (req, res) => {
     try {
         await Routine.create({
             name: req.body.name,
+            day: req.body.day,
             type: req.body.type,
             description: req.body.description
         });
@@ -194,6 +194,36 @@ app.post('/routine', async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(400).json("Error creating routine");
+    }
+});
+
+app.get('/routine', async (req, res) => {
+    try {
+        const routines = await Routine.findAll();
+        res.json(routines);
+    } catch (error) {
+        console.error('Error fetching routines:', error);
+        res.status(500).json({ message: 'Error fetching routines' });
+    }
+});
+
+app.delete('/routine/:routineId', async (req, res) => {
+    const routineId = req.params.routineId;
+
+    try {
+        const deletedRoutine = await Routine.findByPk(routineId);
+
+        if (!deletedRoutine) {
+            return res.status(404).json({ error: 'Routine not found' });
+        }
+
+        await deletedRoutine.destroy()
+
+        res.status(200).json({ message: 'Routine deleted successfully', deletedRoutine });
+
+    } catch (error) {
+        console.error('Error deleting routine:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
