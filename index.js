@@ -83,6 +83,7 @@ app.post('/signup', async (req, res) => {
         const user = await User.create()
         await Signup.create({
             name: req.body.name,
+            surname: req.body.surname,
             email: req.body.email,
             password: req.body.password,
             userId: user.id
