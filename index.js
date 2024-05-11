@@ -11,7 +11,7 @@ const users = require('./src/main/backend/routes/user');
 const plans = require('./src/main/backend/routes/plan');
 const planRoutines = require('./src/main/backend/routes/planRoutine');
 const routines = require('./src/main/backend/routes/routine');
-const routineExercises = require('./src/main/backend/routes/routineExercise');
+const routineExercise = require('./src/main/backend/routes/routineExercise');
 const exercises = require('./src/main/backend/routes/exercise');
 const cors = require('cors');
 
@@ -32,7 +32,7 @@ app.use('/api/user', users);
 app.use('./plan', plans);
 app.use('./planRoutine', planRoutines);
 app.use('./routine', routines);
-app.use('./routineExercise', routineExercises);
+app.use('./routineExercise', routineExercise);
 app.use('/exercise', exercises);
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
@@ -228,14 +228,22 @@ app.delete('/routine/:routineId', async (req, res) => {
 });
 
 app.post('/addexercise', async (req, res) => {
+    const routineExerciseId = req.body.routineExerciseId;
+
+    if (!routineExerciseId) {
+        return res.status(400).json("No valid exercise ID provided.");
+    }
+
     try {
-        await RoutineExercise.create({
-            name: req.body.name,
-            sets: req.body.sets,
-            reps: req.body.reps,
-            weight: req.body.weight,
-            duration: req.body.duration,
-        });
+        const [numRowsUpdatedExercise] = await RoutineExercise.create({
+                name: req.body.name,
+                sets: req.body.sets,
+                reps: req.body.reps,
+                weight: req.body.weight,
+                duration: req.body.duration,
+            },
+            { where: { id: routineExerciseId } }
+        );
         return res.json("Exercise created successfully");
     } catch (error) {
         console.error(error);
