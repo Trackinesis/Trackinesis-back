@@ -125,6 +125,16 @@ app.post('/signupsteptwo', async (req, res) => {
     }
 });
 
+app.get('/home', async (req, res) => {
+    try {
+        const name = await Signup.findAll();
+        res.json(name);
+    } catch (error) {
+        console.error('Error fetching name:', error);
+        res.status(500).json({ message: 'Error fetching name' });
+    }
+});
+
 app.post('/plan', async (req, res) => {
     try {
         await Plan.create({
