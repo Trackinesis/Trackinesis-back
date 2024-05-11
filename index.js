@@ -227,6 +227,22 @@ app.delete('/routine/:routineId', async (req, res) => {
     }
 });
 
+app.post('/addexercise', async (req, res) => {
+    try {
+        await RoutineExercise.create({
+            name: req.body.name,
+            sets: req.body.sets,
+            reps: req.body.reps,
+            weight: req.body.weight,
+            duration: req.body.duration,
+        });
+        return res.json("Exercise created successfully");
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating exercise");
+    }
+});
+
 app.post('/exercise', async (req, res) => {
     try {
         await Exercise.create({
