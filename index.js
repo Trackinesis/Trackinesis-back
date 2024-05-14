@@ -4,6 +4,7 @@ const path = require('path');
 const db = require('./src/main/backend/util/database');
 const session = require('express-session')
 
+//-----------------ROUTES------------------
 const logins = require('./src/main/backend/routes/login');
 const logouts = require('./src/main/backend/routes/logout');
 const signups = require('./src/main/backend/routes/logout');
@@ -13,6 +14,7 @@ const planRoutines = require('./src/main/backend/routes/planRoutine');
 const routines = require('./src/main/backend/routes/routine');
 const routineExercises = require('./src/main/backend/routes/routineExercise');
 const exercises = require('./src/main/backend/routes/exercise');
+const goal = require('./src/main/backend/routes/goal')
 const cors = require('cors');
 
 app.use(cors({origin: 'http://localhost:3000'}));
@@ -25,6 +27,7 @@ app.use(session({
 }));
 app.use(express.urlencoded({extended: true}));
 
+//-----------------USEAGES------------------
 app.use('/', logins);
 app.use('/logout', logouts);
 app.use('/signup', signups);
@@ -34,6 +37,7 @@ app.use('./planRoutine', planRoutines);
 app.use('./routine', routines);
 app.use('./routineExercise', routineExercises);
 app.use('/exercise', exercises);
+app.use('/goal', goal)
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
@@ -48,6 +52,8 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
         });
 })();
 
+//-----------------MODELS------------------
+const Models = require('./src/main/backend/model/index')
 const Signup = require('./src/main/backend/model/signup');
 const User = require('./src/main/backend/model/user');
 const Plan = require('./src/main/backend/model/plan');
@@ -55,6 +61,7 @@ const PlanRoutine = require('./src/main/backend/model/planRoutine')
 const Routine = require('./src/main/backend/model/routine');
 const RoutineExercise = require('./src/main/backend/model/routineExercise');
 const Exercise = require('./src/main/backend/model/exercise');
+const Goal = require('./src/main/backend/model/goal')
 const bcrypt = require('bcryptjs');
 
 app.post('/login', async (req, res) => {
@@ -204,6 +211,20 @@ app.post('/routineExercise', async (req, res) => {
         console.error(error);
         return res.status(400).json("Error creating exercise");
     }
+});
+
+app.post('/goal', async (req, res) => {
+    try {
+        await Goal.create({
+            name: req.body.name,
+            description: req.body.description,
+            status: req.body.status
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating")
+    }
+
 });
 
 app.get('/home', (req, res) => {

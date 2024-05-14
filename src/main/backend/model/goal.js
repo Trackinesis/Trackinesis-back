@@ -1,22 +1,25 @@
-const {DataType } = require('sequelize');
+const { DataTypes} = require('sequelize');
 const db = require('../util/database');
 
-const Goal = db.define('Goal', {
+const Goal = db.define('goal', {
     id: {
-        type: DataType.INTEGER,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    weightGoal: {
-        type: DataType.INTEGER,
+    name: {
+        type: DataTypes.STRING,
         allowNull: false
     },
-    timesPerWeek: {
-        type: DataType.INTEGER,
+    description: {
+        type: DataTypes.STRING,
         allowNull: false
     },
-
-
-});
+    status: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    }
+},{freezeTableName: true});
 
 module.exports = Goal;
