@@ -12,7 +12,7 @@ const users = require('./src/main/backend/routes/user');
 const plans = require('./src/main/backend/routes/plan');
 const planRoutines = require('./src/main/backend/routes/planRoutine');
 const routines = require('./src/main/backend/routes/routine');
-const routineExercises = require('./src/main/backend/routes/routineExercise');
+const routineExercise = require('./src/main/backend/routes/routineExercise');
 const exercises = require('./src/main/backend/routes/exercise');
 const goal = require('./src/main/backend/routes/goal')
 const cors = require('cors');
@@ -35,7 +35,7 @@ app.use('/api/user', users);
 app.use('./plan', plans);
 app.use('./planRoutine', planRoutines);
 app.use('./routine', routines);
-app.use('./routineExercise', routineExercises);
+app.use('./routineExercise', routineExercise);
 app.use('/exercise', exercises);
 app.use('/goal', goal)
 
@@ -100,6 +100,7 @@ app.post('/signup', async (req, res) => {
         const user = await User.create()
         await Signup.create({
             name: req.body.name,
+            surname: req.body.surname,
             email: req.body.email,
             password: req.body.password,
             userId: user.id
@@ -110,7 +111,6 @@ app.post('/signup', async (req, res) => {
         return res.status(400).json(error);
     }
 });
-
 
 app.post('/signupsteptwo', async (req, res) => {
     try {
@@ -142,6 +142,16 @@ app.post('/signupsteptwo', async (req, res) => {
     }
 });
 
+app.get('/home', async (req, res) => {
+    try {
+        const name = await Signup.findAll();
+        res.json(name);
+    } catch (error) {
+        console.error('Error fetching name:', error);
+        res.status(500).json({ message: 'Error fetching name' });
+    }
+});
+
 app.post('/plan', async (req, res) => {
     try {
         await Plan.create({
@@ -159,10 +169,41 @@ app.post('/plan', async (req, res) => {
     }
 });
 
-app.post('/routine', async (req, res) => {
+app.get('/plan', async (req, res) => {
+    try {
+        const plans = await Plan.findAll();
+        res.json(plans);
+    } catch (error) {
+        console.error('Error fetching plans:', error);
+        res.status(500).json({ message: 'Error fetching plans' });
+    }
+});
+
+app.delete('/plan/:planId', async (req, res) => {
+    const planId = req.params.planId;
+
+    try {
+        const deletedPlan = await Plan.findByPk(planId);
+
+        if (!deletedPlan) {
+            return res.status(404).json({ error: 'Plan not found' });
+        }
+
+        await deletedPlan.destroy()
+
+        res.status(200).json({ message: 'Plan deleted successfully', deletedPlan });
+
+    } catch (error) {
+        console.error('Error deleting plan:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.post('/createroutine', async (req, res) => {
     try {
         await Routine.create({
             name: req.body.name,
+            day: req.body.day,
             type: req.body.type,
             description: req.body.description
         });
@@ -170,6 +211,60 @@ app.post('/routine', async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(400).json("Error creating routine");
+    }
+});
+
+app.get('/routine', async (req, res) => {
+    try {
+        const routines = await Routine.findAll();
+        res.json(routines);
+    } catch (error) {
+        console.error('Error fetching routines:', error);
+        res.status(500).json({ message: 'Error fetching routines' });
+    }
+});
+
+app.delete('/routine/:routineId', async (req, res) => {
+    const routineId = req.params.routineId;
+
+    try {
+        const deletedRoutine = await Routine.findByPk(routineId);
+
+        if (!deletedRoutine) {
+            return res.status(404).json({ error: 'Routine not found' });
+        }
+
+        await deletedRoutine.destroy()
+
+        res.status(200).json({ message: 'Routine deleted successfully', deletedRoutine });
+
+    } catch (error) {
+        console.error('Error deleting routine:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.post('/addexercise', async (req, res) => {
+    const routineExerciseId = req.body.routineExerciseId;
+
+    if (!routineExerciseId) {
+        return res.status(400).json("No valid exercise ID provided.");
+    }
+
+    try {
+        const [numRowsUpdatedExercise] = await RoutineExercise.create({
+                name: req.body.name,
+                sets: req.body.sets,
+                reps: req.body.reps,
+                weight: req.body.weight,
+                duration: req.body.duration,
+            },
+            { where: { id: routineExerciseId } }
+        );
+        return res.json("Exercise created successfully");
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating exercise");
     }
 });
 
@@ -234,3 +329,4 @@ app.get('/home', (req, res) => {
 app.listen(8081, () => {
     console.log('Server is running on port 8081');
 });
+

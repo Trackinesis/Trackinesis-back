@@ -5,7 +5,7 @@ const User = require('../model/user')
 const expirationTime = '1h';
 
 exports.createUser = async (req, res) => {
-    const {name, email, password} = req.body;
+    const {name, surname, email, password} = req.body;
     let existingUser = await Signup.findOne({
         where: {email}
     });
@@ -16,6 +16,7 @@ exports.createUser = async (req, res) => {
 
     await Signup.create({
         name,
+        surname,
         email,
         password,
         userId: user.id
@@ -32,4 +33,5 @@ exports.createUser = async (req, res) => {
         res.status(500).json({message: 'Server error'});
     }
 }
+
 //hacer lo mismo pero para login

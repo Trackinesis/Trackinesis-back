@@ -14,6 +14,10 @@ const Signup = db.define('signup', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    surname: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -22,7 +26,7 @@ const Signup = db.define('signup', {
     password: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: false
     }
 }, {
     freezeTableName: true
