@@ -1,8 +1,8 @@
-//hacer un AuthIt using crypto y ver sus funciones
 const jwt = require ("jsonwebtoken")
 const User = require("../model/signup")
 
-exports.token = async (req, res) => {
+//llamado cada vez q hago front - back
+exports.sessionVerifier = async (req, res) => {
     if (!req.headers.authorization){
         return {
             success: false,
