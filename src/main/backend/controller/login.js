@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const SignupTable = require('../model/signup');
+const Signup = require('../model/signup');
 
 const expirationTime = '1h';
 
@@ -9,14 +9,17 @@ exports.login = async (req, res) => {
         return res.status(400).json({ message: 'Please enter your email address and password.' });
     }
 
-    let findUser = await SignupTable.findOne({
+    let user = await Signup.findOne({
         where: { email, password }
     });
-    if (!findUser) {
+    if (!user) {
         return res.status(404).json({ message: 'User not found' });
     }
     try {
-        const token = jwt.sign({ id: findUser.id },
+        const token = jwt.sign({
+                id: user.id,
+                email: user.email
+            },
             process.env.USER, {
                 expiresIn: expirationTime
             });
