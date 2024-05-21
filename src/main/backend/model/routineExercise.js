@@ -29,7 +29,7 @@ const RoutineExercise = db.define('routineExercise', {
     duration: {
         type: DataTypes.INTEGER,
         allowNull: true
-    }
+    },
 }, {
     freezeTableName: true
 });

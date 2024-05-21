@@ -48,6 +48,7 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
         });
 })();
 
+const Models = require('./src/main/backend/model/index');
 const Signup = require('./src/main/backend/model/signup');
 const User = require('./src/main/backend/model/user');
 const Plan = require('./src/main/backend/model/plan');
@@ -55,6 +56,7 @@ const PlanRoutine = require('./src/main/backend/model/planRoutine')
 const Routine = require('./src/main/backend/model/routine');
 const RoutineExercise = require('./src/main/backend/model/routineExercise');
 const Exercise = require('./src/main/backend/model/exercise');
+const {where} = require("sequelize");
 
 app.post('/login', async (req, res) => {
     try {
@@ -101,7 +103,7 @@ app.post('/signupsteptwo', async (req, res) => {
         console.log(userId)
 
         if (!userId) {
-            return res.status(400).json("No valid user ID provided.");
+            return res.status(400).json({userId});
         }
 
         const [numRowsUpdatedUser] = await User.update({
@@ -227,30 +229,6 @@ app.delete('/routine/:routineId', async (req, res) => {
     }
 });
 
-app.post('/addexercise', async (req, res) => {
-    const routineExerciseId = req.body.routineExerciseId;
-
-    if (!routineExerciseId) {
-        return res.status(400).json("No valid exercise ID provided.");
-    }
-
-    try {
-        const [numRowsUpdatedExercise] = await RoutineExercise.create({
-                name: req.body.name,
-                sets: req.body.sets,
-                reps: req.body.reps,
-                weight: req.body.weight,
-                duration: req.body.duration,
-            },
-            { where: { id: routineExerciseId } }
-        );
-        return res.json("Exercise created successfully");
-    } catch (error) {
-        console.error(error);
-        return res.status(400).json("Error creating exercise");
-    }
-});
-
 app.post('/exercise', async (req, res) => {
     try {
         await Exercise.create({
@@ -277,14 +255,19 @@ app.get('/exercise', async (req, res) => {
 
 app.post('/routineExercise', async (req, res) => {
     try {
-        await RoutineExercise.create({
+        const routine = await Routine.findOne( where(routineId = req.body.routineId) )
+        const exercise = await Exercise.findOne( where(exerciseId = req.body.exerciseId) )
+
+        const routineExercise = await RoutineExercise.create({
             name: req.body.name,
             sets: req.body.sets,
             reps: req.body.reps,
             weight: req.body.weight,
-            duration: req.body.duration
+            duration: req.body.duration,
         });
-        return res.json("Exercise created successfully");
+        await routineExercise.addRoutine(routine)
+        await routineExercise.addExercise(exercise)
+        return res.json({ routineExercise });
     } catch (error) {
         console.error(error);
         return res.status(400).json("Error creating exercise");
