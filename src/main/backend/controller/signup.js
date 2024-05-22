@@ -22,16 +22,17 @@ exports.createUser = async (req, res) => {
         userId: user.id
     });
     //hacer el token y enviar el token
+    let token;
     try {
-        const token = jwt.sign({id: user.id}, User, {
-            expiresIn: expirationTime
-        });
-        res.status(201).json({message: 'User created successfully', token : token}) //atajo este json en el front
-
+        token = jwt.sign({
+            userId: user.userId,
+            email: user.email
+        }, process.env.JWT_SECRET,
+            {expiresIn: expirationTime}
+        );
     } catch (error) {
         console.error(error);
-        res.status(500).json({message: 'Server error'});
+        res.status(500).json({message: "Couldn't create user"});
     }
+    res.status(201).json({message: 'User created successfully'});
 }
-
-//hacer lo mismo pero para login

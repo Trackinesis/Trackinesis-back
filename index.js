@@ -62,7 +62,6 @@ const Routine = require('./src/main/backend/model/routine');
 const RoutineExercise = require('./src/main/backend/model/routineExercise');
 const Exercise = require('./src/main/backend/model/exercise');
 const Goal = require('./src/main/backend/model/goal')
-const bcrypt = require('bcryptjs');
 
 app.post('/login', async (req, res) => {
     try {
@@ -73,7 +72,7 @@ app.post('/login', async (req, res) => {
                 password: password
             }
         });
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+        if (!user) {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
 
