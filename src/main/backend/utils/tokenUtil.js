@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 class TokenUtil {
     constructor() {
-        this.expirationTime = '1h'
+        this.expirationTime = 0
         this.key = ''
     }
 
@@ -19,29 +19,36 @@ class TokenUtil {
             subject : userId
         }
         const options = {
-            expiresIn: this.expirationTime
+            expiresIn: this.expirationTime,
+            algorithm: 'HS512'
         }
         return jwt.sign(values, this.key, options)
     }
 
     tokenValidate(token) {
         try {
-            const decodedToken = jwt.verify(token, this.key)
+            const decoded = jwt.verify(token, this.key, { algorithms: ['HS512'] })
             return true
         } catch (err) {
             if (err instanceof jwt.TokenExpiredError || err.message.includes('invalid signature')) {
-                return false;
+                return false
             }
-            throw err;
+            throw err
         }
     }
 
     getUserIdByToken(token) {
-        const decodedToken = jwt.verify(token, this.key)
-        return decodedToken.subject
+        try {
+            const decoded = jwt.verify(token, this.key, { algorithms: ['HS512'] })
+            return decoded.subject
+        } catch (error) {
+            return null;
+        }
     }
 
 }
+
+module.exports = TokenUtil;
 
 //To use this do:
 // const jwtUtil = new JwtUtil();
