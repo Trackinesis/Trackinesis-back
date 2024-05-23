@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const db = require('../util/database');
+const db = require('../utils/database');
 const PlanRoutine = require("./planRoutine");
 
 const Routine = db.define('routine', {

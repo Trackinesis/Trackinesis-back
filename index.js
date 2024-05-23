@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const db = require('./src/main/backend/util/database');
+const db = require('./src/main/backend/utils/database');
 const session = require('express-session')
 
 const logins = require('./src/main/backend/routes/login');
