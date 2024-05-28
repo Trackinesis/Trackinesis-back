@@ -28,7 +28,7 @@ class TokenUtil {
     tokenValidate(token) {
         try {
             const decoded = jwt.verify(token, this.key, { algorithms: ['HS512'] })
-            return true
+            return decoded
         } catch (err) {
             if (err instanceof jwt.TokenExpiredError || err.message.includes('invalid signature')) {
                 return false
