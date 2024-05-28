@@ -31,5 +31,15 @@ exports.createUser = async (req, res) => {
         console.error(error);
         res.status(500).json({message: 'Server error'});
     }
+    console.log("created used " + name);
+
+    return res.status(200).json({
+        success: true,
+        data: {
+            userId: user.userId,
+            email: user.email,
+            token: token
+        },
+    });
 }
 //hacer lo mismo pero para login
