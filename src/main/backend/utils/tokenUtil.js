@@ -1,9 +1,10 @@
 const jwt = require('jsonwebtoken');
 
 class TokenUtil {
-    constructor() {
-        this.expirationTime = 0
-        this.key = ''
+
+    constructor(expirationTime, key) {
+        this.expirationTime = expirationTime
+        this.key = key
     }
 
     setExpirationTime(time) {

@@ -70,7 +70,7 @@ app.post('/login', async (req, res) => {
             }
         });
 
-        tokenUtil = new TokenUtil();
+        tokenUtil = new TokenUtil(36000, "key");
         return res.json({token: tokenUtil.generateToken({id: user.id})});
 
         // if (user != null) {
