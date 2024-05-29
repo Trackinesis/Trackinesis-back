@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const db = require('./src/main/backend/util/database');
+const db = require('./src/main/backend/utils/database');
 const session = require('express-session')
 
 const logins = require('./src/main/backend/routes/login');
@@ -57,8 +57,10 @@ const Routine = require('./src/main/backend/model/routine');
 const RoutineExercise = require('./src/main/backend/model/routineExercise');
 const Exercise = require('./src/main/backend/model/exercise');
 const {where} = require("sequelize");
+const TokenUtil = require("./src/main/backend/utils/tokenUtil");
 
 app.post('/login', async (req, res) => {
+    let tokenUtil;
     try {
         const {email, password} = req.body;
         const user = await Signup.findOne({
@@ -67,16 +69,19 @@ app.post('/login', async (req, res) => {
                 password: password
             }
         });
-        if (user) {
-            req.session.user = user;
-            req.session.authorized = true;
-            return res.redirect('/home');
-        } else {
-            return res.send('Fail');
-        }
+
+        tokenUtil = new TokenUtil(36000, "key");
+        return res.json({token: tokenUtil.generateToken({id: user.id})});
+
+        // if (user != null) {
+        //     res.session.user = user;
+        //     res.session.authorized = true;
+        //
+        // } else {
+        //     return res.send('Fail');
+        // }
     } catch (error) {
-        console.error('Error while searching in the database.', error);
-        return res.send('Error while searching in the database.');
+        return res.send({message: 'Error while searching in the database pom.'});
     }
 });
 
