@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const Signup = require('../model/signup');
 
-const expirationTime = '24h';
+const expirationTime = '1h';
 
 exports.login = async (req, res) => {
     const { email, password } = req.body;
@@ -12,34 +12,20 @@ exports.login = async (req, res) => {
     let user = await Signup.findOne({
         where: { email, password }
     });
-    if (!findUser) {
+    if (!user) {
         return res.status(404).json({ message: 'User not found' });
     }
-    let token;
     try {
-        token = jwt.sign(
-            {
-                userId: user.userId,
-                email: user.email,
+        const token = jwt.sign({
+                id: user.id,
+                email: user.email
             },
-            process.env.JWT_SECRET,
-            {expiresIn: expirationTime }
-        );
+            process.env.USER, {
+                expiresIn: expirationTime
+            });
+        res.status(200).json({ message: 'User logged in successfully', token: token });
     } catch (error) {
         console.error(error);
-        res.success = false;
-        res.message = 'jwt token error'
-        return res.send(res);
+        res.status(500).json({ message: 'Server error' });
     }
-    console.log("created used " + name);
-
-    return res.status(200).json({
-        success: true,
-        data: {
-            userId: user.userId,
-            email: user.email,
-            token: token
-        },
-    });
-
 }

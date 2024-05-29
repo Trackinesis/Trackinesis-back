@@ -7,7 +7,6 @@ const Routine = require('./routine');
 const RoutineExercise = require('./routineExercise');
 const Exercise = require('./exercise');
 
-Signup.hasOne(User, { foreignKey: 'userId' });
 User.belongsTo(Signup, { foreignKey: 'userId' });
 
 Signup.hasOne(Goal, { foreignKey: 'userId' })

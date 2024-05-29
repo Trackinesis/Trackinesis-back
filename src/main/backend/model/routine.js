@@ -13,6 +13,10 @@ const Routine = db.define('routine', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    day: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     type: {
         type: DataTypes.STRING,
         allowNull: false
