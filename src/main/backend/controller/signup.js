@@ -26,6 +26,7 @@ exports.createUser = async (req, res) => {
     //const userResponseDto = new UserResponseDto(signup, user)
     //aca se devuelve un response userDTO
     //hacer el token y enviar el token
+    let token;
     try {
         const token = jwt.sign({id: user.id}, User, {
             expiresIn: expirationTime
@@ -34,8 +35,7 @@ exports.createUser = async (req, res) => {
                                                                                 //, user: userResponseDto
     } catch (error) {
         console.error(error);
-        res.status(500).json({message: 'Server error'});
+        res.status(500).json({message: "Couldn't create user"});
     }
+    res.status(201).json({message: 'User created successfully'});
 }
-
-//hacer lo mismo pero para login
