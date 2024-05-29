@@ -7,24 +7,35 @@ const Routine = require('./routine');
 const RoutineExercise = require('./routineExercise');
 const Exercise = require('./exercise');
 
-User.belongsTo(Signup, { foreignKey: 'userId' });
+//Foo.hasOne(Bar, {
+//   foreignKey: {
+//     allowNull: false,
+//   },
+// });
 
-Signup.hasOne(Goal, { foreignKey: 'userId' })
+
+Signup.hasOne(Goal, { foreignKey: 'userId' }) //TODO hasMany
 Goal.belongsTo(Signup, { foreignKey: 'userId'})
 
 Signup.hasMany(Plan, { foreignKey: 'userId' });
-Plan.belongsTo(Signup, { foreignKey: 'userId' });
+Plan.belongsTo(Signup, { foreignKey: 'userId' }); //TODO [17;21] verif si esta bien
 
-Plan.hasMany(PlanRoutine, { foreignKey: 'planId' });
-PlanRoutine.belongsTo(Plan, { foreignKey: 'planId' });
+User.belongsTo(Signup, { foreignKey: 'userId', allowNull: false });
 
-Routine.hasMany(PlanRoutine, { foreignKey: 'routineId' });
-PlanRoutine.belongsTo(Routine, { foreignKey: 'routineId' });
 
-RoutineExercise.belongsTo(Routine, { foreignKey: 'routineId' });
+Signup.hasMany(Plan, { foreignKey: 'userId', allowNull: false });
+Plan.belongsTo(Signup, { foreignKey: 'userId', allowNull: false });
 
-Exercise.hasMany(RoutineExercise, { foreignKey: 'exerciseId' });
-RoutineExercise.belongsTo(Exercise, { foreignKey: 'exerciseId' });
+Plan.hasMany(PlanRoutine, { foreignKey: 'planId', allowNull: false });
+PlanRoutine.belongsTo(Plan, { foreignKey: 'planId', allowNull: false });
+
+Routine.hasMany(PlanRoutine, { foreignKey: 'routineId', allowNull: false });
+PlanRoutine.belongsTo(Routine, { foreignKey: 'routineId', allowNull: false });
+
+RoutineExercise.belongsTo(Routine, { foreignKey: 'routineId', allowNull: false });
+
+Exercise.hasMany(RoutineExercise, { foreignKey: 'exerciseId', allowNull: false });
+RoutineExercise.belongsTo(Exercise, { foreignKey: 'exerciseId', allowNull: false });
 
 module.exports = {
     Signup,

@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const db = require('./src/main/backend/util/database');
+const db = require('./src/main/backend/utils/database');
 const session = require('express-session')
 
 //-----------------ROUTES------------------
@@ -52,8 +52,8 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
         });
 })();
 
-//-----------------MODELS------------------
-const Models = require('./src/main/backend/model/index')
+
+const Models = require('./src/main/backend/model/index');
 const Signup = require('./src/main/backend/model/signup');
 const User = require('./src/main/backend/model/user');
 const Plan = require('./src/main/backend/model/plan');
@@ -62,8 +62,12 @@ const Routine = require('./src/main/backend/model/routine');
 const RoutineExercise = require('./src/main/backend/model/routineExercise');
 const Exercise = require('./src/main/backend/model/exercise');
 const Goal = require('./src/main/backend/model/goal')
+const {where} = require("sequelize");
+const TokenUtil = require("./src/main/backend/utils/tokenUtil");
+
 
 app.post('/login', async (req, res) => {
+    let tokenUtil;
     try {
         const {email, password} = req.body;
         const user = await Signup.findOne({
@@ -72,25 +76,19 @@ app.post('/login', async (req, res) => {
                 password: password
             }
         });
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid username or password' });
-        }
 
-        const sessionId = crypto.randomUUID();
-        await user.createSession({sessionId});
+        tokenUtil = new TokenUtil(36000, "key");
+        return res.json({token: tokenUtil.generateToken({id: user.id})});
 
-        res.json({ sessionId });
-
-        if (user) {
-            req.session.user = user;
-            req.session.authorized = true;
-            return res.redirect('/home');
-        } else {
-            return res.send('Fail');
-        }
+        // if (user != null) {
+        //     res.session.user = user;
+        //     res.session.authorized = true;
+        //
+        // } else {
+        //     return res.send('Fail');
+        // }
     } catch (error) {
-        console.error('Error while searching in the database.', error);
-        return res.send('Error while searching in the database.');
+        return res.send({message: 'Error while searching in the database pom.'});
     }
 });
 
@@ -117,7 +115,7 @@ app.post('/signupsteptwo', async (req, res) => {
         console.log(userId)
 
         if (!userId) {
-            return res.status(400).json("No valid user ID provided.");
+            return res.status(400).json({userId});
         }
 
         const [numRowsUpdatedUser] = await User.update({
@@ -243,30 +241,6 @@ app.delete('/routine/:routineId', async (req, res) => {
     }
 });
 
-app.post('/addexercise', async (req, res) => {
-    const routineExerciseId = req.body.routineExerciseId;
-
-    if (!routineExerciseId) {
-        return res.status(400).json("No valid exercise ID provided.");
-    }
-
-    try {
-        const [numRowsUpdatedExercise] = await RoutineExercise.create({
-                name: req.body.name,
-                sets: req.body.sets,
-                reps: req.body.reps,
-                weight: req.body.weight,
-                duration: req.body.duration,
-            },
-            { where: { id: routineExerciseId } }
-        );
-        return res.json("Exercise created successfully");
-    } catch (error) {
-        console.error(error);
-        return res.status(400).json("Error creating exercise");
-    }
-});
-
 app.post('/exercise', async (req, res) => {
     try {
         await Exercise.create({
@@ -293,14 +267,19 @@ app.get('/exercise', async (req, res) => {
 
 app.post('/routineExercise', async (req, res) => {
     try {
-        await RoutineExercise.create({
+        const routine = await Routine.findOne( where(routineId = req.body.routineId) )
+        const exercise = await Exercise.findOne( where(exerciseId = req.body.exerciseId) )
+
+        const routineExercise = await RoutineExercise.create({
             name: req.body.name,
             sets: req.body.sets,
             reps: req.body.reps,
             weight: req.body.weight,
-            duration: req.body.duration
+            duration: req.body.duration,
         });
-        return res.json("Exercise created successfully");
+        await routineExercise.addRoutine(routine)
+        await routineExercise.addExercise(exercise)
+        return res.json({ routineExercise });
     } catch (error) {
         console.error(error);
         return res.status(400).json("Error creating exercise");

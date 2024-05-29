@@ -6,6 +6,8 @@ const expirationTime = '1h';
 
 exports.createUser = async (req, res) => {
     const {name, surname, email, password} = req.body;
+    // casteas a createUserDto
+    // pasar a userService
     let existingUser = await Signup.findOne({
         where: {email}
     });
@@ -14,22 +16,23 @@ exports.createUser = async (req, res) => {
     }
     const user = await User.create()
 
-    await Signup.create({
+    const signup = await Signup.create({
         name,
         surname,
         email,
         password,
         userId: user.id
     });
+    //const userResponseDto = new UserResponseDto(signup, user)
+    //aca se devuelve un response userDTO
     //hacer el token y enviar el token
     let token;
     try {
-        token = jwt.sign({
-            userId: user.userId,
-            email: user.email
-        }, process.env.JWT_SECRET,
-            {expiresIn: expirationTime}
-        );
+        const token = jwt.sign({id: user.id}, User, {
+            expiresIn: expirationTime
+        });
+        res.status(201).json({message: 'User created successfully', token : token}) //atajo este json en el front
+                                                                                //, user: userResponseDto
     } catch (error) {
         console.error(error);
         res.status(500).json({message: "Couldn't create user"});

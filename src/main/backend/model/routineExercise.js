@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const db = require('../util/database');
+const db = require('../utils/database');
 const Routine = require("./routine");
 const Exercise = require("./exercise");
 
@@ -29,7 +29,7 @@ const RoutineExercise = db.define('routineExercise', {
     duration: {
         type: DataTypes.INTEGER,
         allowNull: true
-    }
+    },
 }, {
     freezeTableName: true
 });
