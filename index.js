@@ -3,6 +3,8 @@ const app = express();
 const path = require('path');
 const db = require('./src/main/backend/utils/database');
 const session = require('express-session')
+const jwt = require('jsonwebtoken');
+const SECRET_KEY = 'key'
 
 //-----------------ROUTES------------------
 const logins = require('./src/main/backend/routes/login');
@@ -64,10 +66,10 @@ const Exercise = require('./src/main/backend/model/exercise');
 const Goal = require('./src/main/backend/model/goal')
 const {where} = require("sequelize");
 const TokenUtil = require("./src/main/backend/utils/tokenUtil");
-
+let tokenUtil;
+tokenUtil = new TokenUtil(36000, SECRET_KEY);
 
 app.post('/login', async (req, res) => {
-    let tokenUtil;
     try {
         const {email, password} = req.body;
         const user = await Signup.findOne({
@@ -77,7 +79,6 @@ app.post('/login', async (req, res) => {
             }
         });
 
-        tokenUtil = new TokenUtil(36000, "key");
         return res.json({token: tokenUtil.generateToken({id: user.id})});
 
         // if (user != null) {
@@ -109,11 +110,18 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-app.put('/signup/:userId', async (req, res) => {
-    const userId = parseInt(req.params.userId);
 
+app.put('/signup', async (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
     try {
-        const user = await Signup.findByPk(userId)
+        const userIdFromToken = tokenUtil.getUserIdByToken(token);
+        const userId = parseInt(req.params.userId);
+
+        if (userIdFromToken !== userId) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        const user = await Signup.findByPk(userIdFromToken)
         if (!user) {
             return res.status(404).json({ error: 'User not found'} );
         }
