@@ -111,29 +111,51 @@ app.post('/signup', async (req, res) => {
 });
 
 
-app.put('/signup', async (req, res) => {
+app.post('/updatePassword', async (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
     try {
         const userIdFromToken = tokenUtil.getUserIdByToken(token);
-        const userId = parseInt(req.params.userId);
-
-        if (userIdFromToken !== userId) {
-            return res.status(403).json({ error: 'Forbidden' });
-        }
+        console.log(userIdFromToken)
+        const {currentPass, newPass} = req.body;
+        // const userId = parseInt(req.params.userId);
+        //
+        // if (userIdFromToken !== userId) {
+        //     return res.status(403).json({ error: 'Forbidden' });
+        // }
 
         const user = await Signup.findByPk(userIdFromToken)
         if (!user) {
             return res.status(404).json({ error: 'User not found'} );
         }
-
-        const newPassword = req.body.password;
-        await user.update({ password: newPassword })
+        if (user.password !== currentPass) {
+            return res.status(403).json({ error: 'Current password is incorrect' });
+        }
+        await user.update({ password: newPass })
 
         return res.status(200).json({ message: 'User password updated successfully', user });
-
     } catch (error) {
         console.error('Error updating user password:', error);
         return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.delete('/deleteAccount', async (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
+    try {
+        const userIdFromToken = tokenUtil.getUserIdByToken(token);
+        const user = await Signup.findByPk(userIdFromToken);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        await user.destroy();
+        return res.status(200).json({ message: 'User deleted successfully' });
+
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+
     }
 });
 

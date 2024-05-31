@@ -41,7 +41,7 @@ class TokenUtil {
     getUserIdByToken(token) {
         try {
             const decoded = jwt.verify(token, this.key, { algorithms: ['HS512'] })
-            return decoded.subject;
+            return decoded.subject; //TODO decode or verify
         } catch (error) {
             return null;
         }
