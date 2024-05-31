@@ -155,33 +155,49 @@ app.post('/signupsteptwo', async (req, res) => {
 
 app.post('/signupsteptwo/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId);
-    const { maxBench, maxSquat, maxDeadlift } = req.body;
-  
+    const { maxBench, maxSquat, maxDeadlift, strenghtRatio } = req.body;
+
     try {
-      const userToUpdate = await User.findByPk(userId);
-      if (!userToUpdate) {
-        return res.status(404).json({ error: 'user not found' });
-      }
-      const updatedUser = {
-        ...userToUpdate,
-        maxBench: maxBench || friendToUpdate.maxBench,
-        maxSquat: maxSquat || friendToUpdate.maxSquat,
-        maxDeadlift: maxDeadlift || friendToUpdate.maxDeadlift,
-      };
-  
-      await userToUpdate.update(updatedUser);
-  
-      res.status(200).json({ message: 'User maxes updated successfully', updatedUser });
+        const userToUpdate = await User.findByPk(userId);
+        if (!userToUpdate) {
+            return res.status(404).json({ error: 'user not found' });
+        }
+
+        const updatedStrengthRatio = userToUpdate.weight > 0
+      ? ((maxBench || userToUpdate.maxBench) + (maxSquat || userToUpdate.maxSquat) + (maxDeadlift || userToUpdate.maxDeadlift)) / userToUpdate.weight
+      : 0;
+        
+        const updatedUser = {
+            ...userToUpdate,
+            maxBench: maxBench || userToUpdate.maxBench,
+            maxSquat: maxSquat || userToUpdate.maxSquat,
+            maxDeadlift: maxDeadlift || userToUpdate.maxDeadlift,
+            strenghtRatio: updatedStrengthRatio,
+        };
+
+        await userToUpdate.update(updatedUser);
+
+        res.status(200).json({ message: 'User maxes updated successfully', updatedUser });
     } catch (error) {
-      console.error('Error updating friend maxes:', error);
-      res.status(500).json({ error: 'Internal server error' });
+        console.error('Error updating friend maxes:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-  });
+    });
 
   app.get('/signupsteptwo/:userId', async (req, res) => {
     const userId = req.params.userId;
     try {
         const users = await User.findByPk(userId);
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Error fetching users' });
+    }
+});
+
+app.get('/signupsteptwo', async (req, res) => {
+    try {
+        const users = await User.findAll();
         res.json(users);
     } catch (error) {
         console.error('Error fetching users:', error);
