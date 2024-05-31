@@ -14,7 +14,8 @@ const planRoutines = require('./src/main/backend/routes/planRoutine');
 const routines = require('./src/main/backend/routes/routine');
 const routineExercise = require('./src/main/backend/routes/routineExercise');
 const exercises = require('./src/main/backend/routes/exercise');
-const goal = require('./src/main/backend/routes/goal')
+const goals = require('./src/main/backend/routes/goal')
+const friends = require('./src/main/backend/routes/friend')
 const cors = require('cors');
 
 app.use(cors({origin: 'http://localhost:3000'}));
@@ -37,7 +38,7 @@ app.use('./planRoutine', planRoutines);
 app.use('./routine', routines);
 app.use('./routineExercise', routineExercise);
 app.use('/exercise', exercises);
-app.use('/goal', goal)
+app.use('/goal', goals);
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
@@ -62,14 +63,17 @@ const Routine = require('./src/main/backend/model/routine');
 const RoutineExercise = require('./src/main/backend/model/routineExercise');
 const Exercise = require('./src/main/backend/model/exercise');
 const Goal = require('./src/main/backend/model/goal')
+const Friend = require('./src/main/backend/model/friend')
+
 const {where} = require("sequelize");
 const TokenUtil = require("./src/main/backend/utils/tokenUtil");
+const { name } = require('ejs');
 
 
 app.post('/login', async (req, res) => {
     let tokenUtil;
     try {
-        const {email, password} = req.body;
+        const { email, password } = req.body;
         const user = await Signup.findOne({
             where: {
                 email: email,
@@ -78,17 +82,27 @@ app.post('/login', async (req, res) => {
         });
 
         tokenUtil = new TokenUtil(36000, "key");
-        return res.json({token: tokenUtil.generateToken({id: user.id})});
 
-        // if (user != null) {
-        //     res.session.user = user;
-        //     res.session.authorized = true;
-        //
-        // } else {
-        //     return res.send('Fail');
-        // }
+        if (user) {
+            req.session.user = user;
+            req.session.authorized = true;
+            return res.json({ message: 'Success', token: tokenUtil.generateToken({id: user.id}) });
+        } else {
+             return res.send('Fail');
+        }
     } catch (error) {
-        return res.send({message: 'Error while searching in the database pom.'});
+        console.error('Error while searching in the database.', error);
+        return res.send({message: 'Error while searching in the database.'});
+    }
+});
+
+app.get('/login', async (req, res) => {
+    try {
+        const users = await Signup.findAll();
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Error fetching routines' });
     }
 });
 
@@ -136,6 +150,42 @@ app.post('/signupsteptwo', async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(400).json("Error creating profile");
+    }
+});
+
+app.post('/signupsteptwo/:userId', async (req, res) => {
+    const userId = parseInt(req.params.userId);
+    const { maxBench, maxSquat, maxDeadlift } = req.body;
+  
+    try {
+      const userToUpdate = await User.findByPk(userId);
+      if (!userToUpdate) {
+        return res.status(404).json({ error: 'user not found' });
+      }
+      const updatedUser = {
+        ...userToUpdate,
+        maxBench: maxBench || friendToUpdate.maxBench,
+        maxSquat: maxSquat || friendToUpdate.maxSquat,
+        maxDeadlift: maxDeadlift || friendToUpdate.maxDeadlift,
+      };
+  
+      await userToUpdate.update(updatedUser);
+  
+      res.status(200).json({ message: 'User maxes updated successfully', updatedUser });
+    } catch (error) {
+      console.error('Error updating friend maxes:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.get('/signupsteptwo/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    try {
+        const users = await User.findByPk(userId);
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Error fetching users' });
     }
 });
 
@@ -300,6 +350,103 @@ app.post('/goal', async (req, res) => {
 
 });
 
+app.get('/goal', async (req, res) => {
+    try {
+        const goals = await Goal.findAll();
+        res.json(goals);
+    } catch (error) {
+        console.error('Error fetching goals:', error);
+        res.status(500).json({ message: 'Error fetching goals' });
+    }
+});
+
+app.delete('/goal/:goalId', async (req, res) => {
+    const goalId = req.params.goalId;
+
+    try {
+        const deletedGoal = await Goal.findByPk(goalId);
+
+        if (!deletedGoal) {
+            return res.status(404).json({ error: 'Goal not found' });
+        }
+
+        await deletedGoal.destroy()
+
+        res.status(200).json({ message: 'Goal deleted successfully', deletedGoal });
+
+    } catch (error) {
+        console.error('Error deleting goal:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.post('/goal/:goalId', async (req, res) => {
+    const goalId = parseInt(req.params.goalId);
+    
+    try {
+        const updatedGoal = await Goal.findByPk(goalId)
+        if (!updatedGoal) {
+            res.status(404).json({ error: 'Goal not found'} );
+        }
+    
+        const newStatus = updatedGoal.status === true ? false : true;
+        await updatedGoal.update({ status: newStatus })
+
+        res.status(200).json({ message: 'Goal updated successfully', updatedGoal });
+
+    } catch (error) {
+        console.error('Error updating goal:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+    
+  });
+
+  app.post('/friend', async (req, res) => {
+    try {
+        await Friend.create({
+            name: req.body.name,
+            maxBench: req.body.maxBench,
+            maxSquat: req.body.maxSquat,
+            maxDeadlift: req.body.maxDeadlift
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json("Error creating")
+    }
+
+});
+
+app.get('/friend', async (req, res) => {
+    try {
+        const friends = await Friend.findAll();
+        res.json(friends);
+    } catch (error) {
+        console.error('Error fetching friends:', error);
+        res.status(500).json({ message: 'Error fetching friends' });
+    }
+});
+
+app.delete('/friend/:friendId', async (req, res) => {
+    const friendId = req.params.friendId;
+
+    try {
+        const deleteFriend = await Friend.findByPk(friendId);
+
+        if (!deleteFriend) {
+            return res.status(404).json({ error: 'Friend not found' });
+        }
+
+        await deleteFriend.destroy()
+
+        res.status(200).json({ message: 'Friend deleted successfully', deleteFriend });
+
+    } catch (error) {
+        console.error('Error deleting friend:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+  
+
 app.get('/home', (req, res) => {
     res.send('Welcome to the home page');
 });
@@ -307,4 +454,3 @@ app.get('/home', (req, res) => {
 app.listen(8081, () => {
     console.log('Server is running on port 8081');
 });
-

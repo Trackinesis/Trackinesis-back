@@ -2,10 +2,11 @@ const { DataTypes} = require('sequelize');
 const db = require('../utils/database');
 
 const Goal = db.define('goal', {
-    id: {
+    goalId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        allowNull: false
     },
     name: {
         type: DataTypes.STRING,

@@ -44,10 +44,10 @@ exports.updateGoal = async (req, res) => {
     }
 };
 
-exports.deleteGoal = async (req, res) => {
+/*exports.deleteGoal = async (req, res) => {
     try {
         const deleted = await Goal.destroy({
-            where: { id: req.params.id }
+            where: { goalId: req.params.goalId }
         });
         if (!deleted) {
             return res.status(404).json({message: 'Goal not found'});
@@ -56,4 +56,4 @@ exports.deleteGoal = async (req, res) => {
     } catch (error) {
         res.status(500).json({message: 'Error deleting goal', error});
     }
-};
+};*/

@@ -6,6 +6,7 @@ const PlanRoutine = require('./planRoutine');
 const Routine = require('./routine');
 const RoutineExercise = require('./routineExercise');
 const Exercise = require('./exercise');
+const Friend = require('./friend');
 
 //Foo.hasOne(Bar, {
 //   foreignKey: {
@@ -19,6 +20,9 @@ Goal.belongsTo(Signup, { foreignKey: 'userId'})
 
 Signup.hasMany(Plan, { foreignKey: 'userId' });
 Plan.belongsTo(Signup, { foreignKey: 'userId' }); //TODO [17;21] verif si esta bien
+
+Signup.hasMany(Friend, { foreignKey: 'userId' });
+Friend.belongsTo(Signup, { foreignKey: 'userId' });
 
 User.belongsTo(Signup, { foreignKey: 'userId', allowNull: false });
 
@@ -41,6 +45,7 @@ module.exports = {
     Signup,
     User,
     Goal,
+    Friend,
     Plan,
     PlanRoutine,
     Routine,
