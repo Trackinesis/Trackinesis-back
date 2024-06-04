@@ -18,6 +18,22 @@ const User = db.define('user', {
     gender: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    maxBench: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    maxSquat: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    maxDeadlift: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    strenghtRatio: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
     }
 }, {
     freezeTableName: true
