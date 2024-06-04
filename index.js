@@ -106,7 +106,25 @@ app.post('/login', async (req, res) => {
       console.error('Error while searching in the database.', error);
       return res.send({ message: 'Error while searching in the database.' });
     }
-});  
+});
+
+app.post('/updatePassword', async (req, res) => {
+    const userId = req.body.userId;
+    const newPassword = req.body.newPassword;
+
+    try {
+        const userToUpdate = await Signup.findByPk(userId);
+        if (!userToUpdate) {
+            return res.status(404).json({ error: 'user not found' });
+        }
+
+        await userToUpdate.update({password : newPassword});
+        res.status(200).json({message: 'Update successful'});
+    } catch (err) {
+        console.log('error updating user');
+        res.status(500).json({error: 'Internal server error'});
+    }
+});
 
 app.get('/login', async (req, res) => {
     try {
