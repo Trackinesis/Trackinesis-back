@@ -15,30 +15,27 @@ const Friend = require('./friend');
 // });
 
 
-Signup.hasOne(Goal, { foreignKey: 'userId' }) //TODO hasMany
+Signup.hasMany(Goal, { foreignKey: 'userId', onDelete: 'Cascade' }) //TODO hasMany
 Goal.belongsTo(Signup, { foreignKey: 'userId'})
 
-Signup.hasMany(Plan, { foreignKey: 'userId' });
-Plan.belongsTo(Signup, { foreignKey: 'userId' }); //TODO [17;21] verif si esta bien
-
-Signup.hasMany(Friend, { foreignKey: 'userId' });
+Signup.hasMany(Friend, { foreignKey: 'userId', onDelete: 'Cascade' });
 Friend.belongsTo(Signup, { foreignKey: 'userId' });
 
-User.belongsTo(Signup, { foreignKey: 'userId', allowNull: false });
+Signup.hasOne(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+User.belongsTo(Signup, { foreignKey: 'userId', allowNull: false, onDelete: 'Cascade' });
 
-
-Signup.hasMany(Plan, { foreignKey: 'userId', allowNull: false });
+Signup.hasMany(Plan, { foreignKey: 'userId', allowNull: false, onDelete: 'Cascade' });
 Plan.belongsTo(Signup, { foreignKey: 'userId', allowNull: false });
 
-Plan.hasMany(PlanRoutine, { foreignKey: 'planId', allowNull: false });
+Plan.hasMany(PlanRoutine, { foreignKey: 'planId', allowNull: false , onDelete: 'Cascade' });
 PlanRoutine.belongsTo(Plan, { foreignKey: 'planId', allowNull: false });
 
-Routine.hasMany(PlanRoutine, { foreignKey: 'routineId', allowNull: false });
+Routine.hasMany(PlanRoutine, { foreignKey: 'routineId', allowNull: false, onDelete: 'Cascade' });
 PlanRoutine.belongsTo(Routine, { foreignKey: 'routineId', allowNull: false });
 
 RoutineExercise.belongsTo(Routine, { foreignKey: 'routineId', allowNull: false });
 
-Exercise.hasMany(RoutineExercise, { foreignKey: 'exerciseId', allowNull: false });
+Exercise.hasMany(RoutineExercise, { foreignKey: 'exerciseId', allowNull: false, onDelete: 'Cascade' });
 RoutineExercise.belongsTo(Exercise, { foreignKey: 'exerciseId', allowNull: false });
 
 module.exports = {

@@ -14,8 +14,9 @@ const planRoutines = require('./src/main/backend/routes/planRoutine');
 const routines = require('./src/main/backend/routes/routine');
 const routineExercise = require('./src/main/backend/routes/routineExercise');
 const exercises = require('./src/main/backend/routes/exercise');
-const goals = require('./src/main/backend/routes/goal')
-const friends = require('./src/main/backend/routes/friend')
+const goals = require('./src/main/backend/routes/goal');
+const friends = require('./src/main/backend/routes/friend');
+//const tokens = require('./src/main/backend/routes/token');
 const cors = require('cors');
 
 app.use(cors({origin: 'http://localhost:3000'}));
@@ -39,6 +40,8 @@ app.use('./routine', routines);
 app.use('./routineExercise', routineExercise);
 app.use('/exercise', exercises);
 app.use('/goal', goals);
+app.use('/friend', friends);
+//app.use('/token', tokens)
 
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
@@ -64,6 +67,7 @@ const RoutineExercise = require('./src/main/backend/model/routineExercise');
 const Exercise = require('./src/main/backend/model/exercise');
 const Goal = require('./src/main/backend/model/goal')
 const Friend = require('./src/main/backend/model/friend')
+const Token = require('./src/main/backend/model/token')
 
 const {where} = require("sequelize");
 const TokenUtil = require("./src/main/backend/utils/tokenUtil");
@@ -73,28 +77,36 @@ const { name } = require('ejs');
 app.post('/login', async (req, res) => {
     let tokenUtil;
     try {
-        const { email, password } = req.body;
-        const user = await Signup.findOne({
-            where: {
-                email: email,
-                password: password
-            }
-        });
-
-        tokenUtil = new TokenUtil(36000, "key");
-
-        if (user) {
-            req.session.user = user;
-            req.session.authorized = true;
-            return res.json({ message: 'Success', token: tokenUtil.generateToken({id: user.id}) });
-        } else {
-             return res.send('Fail');
+      const { email, password } = req.body;
+      const user = await Signup.findOne({
+        where: {
+          email: email,
+          password: password
         }
+      });
+  
+      tokenUtil = new TokenUtil(36000, "key");
+  
+      if (user) {
+        req.session.user = user;
+        req.session.authorized = true;
+  
+        const tokenString = tokenUtil.generateToken({ id: user.userId });
+  
+        const newToken = await Token.create({
+          token: tokenString,
+          userId: user.userId
+        });
+  
+        return res.json({ message: 'Success', token: tokenString }); // Send token object
+      } else {
+        return res.send('Fail');
+      }
     } catch (error) {
-        console.error('Error while searching in the database.', error);
-        return res.send({message: 'Error while searching in the database.'});
+      console.error('Error while searching in the database.', error);
+      return res.send({ message: 'Error while searching in the database.' });
     }
-});
+});  
 
 app.get('/login', async (req, res) => {
     try {
@@ -103,6 +115,35 @@ app.get('/login', async (req, res) => {
     } catch (error) {
         console.error('Error fetching users:', error);
         res.status(500).json({ message: 'Error fetching routines' });
+    }
+});
+
+app.get('/token/:token', async (req, res) => {
+    const token = req.params.token;
+    try {
+      const foundToken = await Token.findByPk(token);
+  
+      if (!foundToken) {
+        return res.status(404).json({ message: 'Token not found' });
+      }
+  
+      const userId = foundToken.userId;
+  
+      res.json({ userId });
+    } catch (error) {
+      console.error('Error fetching token data:', error);
+      res.status(500).json({ message: 'Error fetching token data' });
+    }
+  });  
+
+  app.get('/signupsteptwo/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    try {
+        const users = await User.findByPk(userId);
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Error fetching users' });
     }
 });
 
@@ -123,10 +164,29 @@ app.post('/signup', async (req, res) => {
     }
 });
 
+app.delete('/signup/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const deletedUser = await Signup.findByPk(userId);
+
+        if (!deletedUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        await deletedUser.destroy()
+
+        res.status(200).json({ message: 'User deleted successfully', deletedUser });
+
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.post('/signupsteptwo', async (req, res) => {
     try {
         const userId = req.body.userId;
-        console.log(userId)
 
         if (!userId) {
             return res.status(400).json({userId});
@@ -205,15 +265,23 @@ app.get('/signupsteptwo', async (req, res) => {
     }
 });
 
-app.get('/home', async (req, res) => {
+app.get('/home/:userId', async (req, res) => {
+    const userId = req.params.userId;
     try {
-        const name = await Signup.findAll();
-        res.json(name);
+      const foundUser = await Signup.findByPk(userId);
+  
+      if (!foundUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      const name = foundUser.name;
+  
+      res.json({ name });
     } catch (error) {
-        console.error('Error fetching name:', error);
-        res.status(500).json({ message: 'Error fetching name' });
+      console.error('Error fetching user data:', error);
+      res.status(500).json({ message: 'Error fetching user data' });
     }
-});
+});  
 
 app.post('/plan', async (req, res) => {
     try {
