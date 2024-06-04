@@ -1,14 +1,20 @@
 const {DataTypes} = require('sequelize');
-const db = require('./index');
-const User = require('./user');
+const db = require('../utils/database');
+const User = require("./user");
+const Plan = require("./plan");
 
-const Signup = db.sequelize.define('signup', {
-    id: {
+const Signup = db.define('signup', {
+    userId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        allowNull: false
     },
     name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    surname: {
         type: DataTypes.STRING,
         allowNull: false
     },
@@ -20,17 +26,15 @@ const Signup = db.sequelize.define('signup', {
     password: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
-    },
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        unique: true,
-        references: {
-            model: User,
-            key: 'id'
-        }
+        unique: false
     }
+}, {
+    freezeTableName: true
 });
+
+/*Signup.associate = model => {
+    Signup.hasOne(model.user, { foreignKey: 'userId' });
+    Signup.hasMany(model.plan, { foreignKey: 'userId' });
+};*/
 
 module.exports = Signup;
