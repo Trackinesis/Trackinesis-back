@@ -449,10 +449,11 @@ app.delete('/friend/:friendId', async (req, res) => {
 app.get('/home', (req, res) => {
     res.send('Welcome to the home page');
 });
-
-app.get('/routine/:id', async (req, res) => {
+//----------------
+app.get('/routine/:routineId', async (req, res) => {
+    const routineId = req.params.routineId
     try {
-        const routine = await Routine.findOne({ where: { id: req.params.id } });
+        const routine = await Routine.findByPk(routineId);
         if (routine) {
             res.json(routine);
         } else {
@@ -460,14 +461,16 @@ app.get('/routine/:id', async (req, res) => {
         }
     } catch (error) {
         console.error('Error fetching routine:', error);
-        res.status(500).json({ message: 'Error fetching routine' });
+        res.status(500).json({ error });
     }
 });
 
 app.post ('/copyRoutine', async (req, res) => {
-    try {
-        const { routineId, userId } = req.body;
 
+    const routineId  = req.body.routineId;
+    const userId = req.body.userId;
+
+    try {
         const originalRoutine = await Routine.findByPk(routineId);
 
         if (!originalRoutine) {
