@@ -465,7 +465,7 @@ app.get('/routine/:routineId', async (req, res) => {
     }
 });
 
-app.post ('/copyRoutine', async (req, res) => {
+app.post ('/createroutine', async (req, res) => {
 
     const routineId  = req.body.routineId;
     const userId = req.body.userId;
