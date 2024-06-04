@@ -30,6 +30,11 @@ const User = db.define('user', {
     maxDeadlift: {
         type: DataTypes.INTEGER,
         allowNull: true,
+
+    },
+    strenghtRatio: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
     }
 }, {
     freezeTableName: true
