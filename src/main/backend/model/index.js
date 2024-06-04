@@ -21,6 +21,7 @@ Goal.belongsTo(Signup, { foreignKey: 'userId'})
 Signup.hasMany(Friend, { foreignKey: 'userId', onDelete: 'Cascade' });
 Friend.belongsTo(Signup, { foreignKey: 'userId' });
 
+
 Signup.hasOne(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
 User.belongsTo(Signup, { foreignKey: 'userId', allowNull: false, onDelete: 'Cascade' });
 
