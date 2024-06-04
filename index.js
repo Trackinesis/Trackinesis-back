@@ -71,7 +71,6 @@ const Token = require('./src/main/backend/model/token')
 
 const {where} = require("sequelize");
 const TokenUtil = require("./src/main/backend/utils/tokenUtil");
-const { name } = require('ejs');
 
 
 app.post('/login', async (req, res) => {
