@@ -108,9 +108,9 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.post('/updatePassword', async (req, res) => {
-    const userId = req.body.userId;
-    const newPassword = req.body.newPassword;
+app.post('/updatePassword/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const newPassword = req.body.password;
 
     try {
         const userToUpdate = await Signup.findByPk(userId);
