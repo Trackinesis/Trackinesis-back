@@ -357,7 +357,8 @@ app.post('/createroutine', async (req, res) => {
             name: req.body.name,
             day: req.body.day,
             type: req.body.type,
-            description: req.body.description
+            description: req.body.description,
+            state: req.body.state
         });
         return res.json("Routine created successfully");
     } catch (error) {
