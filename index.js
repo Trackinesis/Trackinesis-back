@@ -71,6 +71,7 @@ const Token = require('./src/main/backend/model/token')
 
 const {where} = require("sequelize");
 const TokenUtil = require("./src/main/backend/utils/tokenUtil");
+const UserHistory = require("./src/main/backend/model/UserHistory");
 //const { name } = require('ejs');
 
 
@@ -234,7 +235,7 @@ app.post('/signupsteptwo', async (req, res) => {
 
 app.post('/signupsteptwo/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId);
-    const { maxBench, maxSquat, maxDeadlift, strenghtRatio } = req.body;
+    const { maxBench, maxSquat, maxDeadLift, strengthRatio } = req.body;
 
     try {
         const userToUpdate = await User.findByPk(userId);
@@ -243,18 +244,20 @@ app.post('/signupsteptwo/:userId', async (req, res) => {
         }
 
         const updatedStrengthRatio = userToUpdate.weight > 0
-      ? ((maxBench || userToUpdate.maxBench) + (maxSquat || userToUpdate.maxSquat) + (maxDeadlift || userToUpdate.maxDeadlift)) / userToUpdate.weight
+      ? ((maxBench || userToUpdate.maxBench) + (maxSquat || userToUpdate.maxSquat) + (maxDeadLift || userToUpdate.maxDeadLift)) / userToUpdate.weight
       : 0;
+
         
         const updatedUser = {
             ...userToUpdate,
             maxBench: maxBench || userToUpdate.maxBench,
             maxSquat: maxSquat || userToUpdate.maxSquat,
-            maxDeadlift: maxDeadlift || userToUpdate.maxDeadlift,
-            strenghtRatio: updatedStrengthRatio,
+            maxDeadLift: maxDeadLift || userToUpdate.maxDeadLift,
+            strengthRatio: updatedStrengthRatio,
         };
 
         await userToUpdate.update(updatedUser);
+        await UserHistory.create({userId, maxBench, maxSquat, maxDeadLift, strengthRatio})
 
         res.status(200).json({ message: 'User maxes updated successfully', updatedUser });
     } catch (error) {
@@ -601,10 +604,26 @@ app.post ('/createroutine', async (req, res) => {
         console.error(error);
         res.status(500).send('Server error');
     }
-})
+});
 
+app.put('/user/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const { maxBench, maxSquat, maxDeadlift, strengthRatio} = req.body;
 
+    try {
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(200).json({ error: 'User not found'});
 
+        }
+        await user.update({ maxBench, maxSquat, maxDeadlift, strengthRatio});
+        await UserHistory.create({userId, maxBench, maxSquat, maxDeadlift, strengthRatio});
+
+    } catch (e) {
+        console.log('Error updating user:', e);
+        res.status(500).json({error: 'Internal server error'});
+    }
+});
 
 app.listen(8081, () => {
     console.log('Server is running on port 8081');
