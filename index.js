@@ -572,6 +572,24 @@ app.get('/routine/:routineId', async (req, res) => {
     }
 });
 
+app.get('friends/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const friends = await Friend.findOne({
+            where: {
+                friendId: friendId,
+                userId: userId
+            }
+        });
+        res.json(friends);
+
+    } catch (error) {
+        console.error('Error fetching friends:', error);
+        res.status(500).json({ error });
+    }
+});
+
 app.post ('/createroutine', async (req, res) => {
 
     const routineId  = req.body.routineId;
