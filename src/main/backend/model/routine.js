@@ -26,8 +26,7 @@ const Routine = db.define('routine', {
         allowNull: true
     },
     state: {
-        type: DataTypes.ENUM,
-        values: ['private', 'friends', 'public'],
+        type: DataTypes.STRING,
         allowNull: false
     }
 }, {
