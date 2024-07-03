@@ -389,22 +389,20 @@ app.delete('/routine/:routineId', async (req, res) => {
 });
 
 app.post('/routineExercise', async (req, res) => {
-   const routineId = req.params.routineId
-   // const exerciseId = req.params.exerciseId
     try {
         const routineExercise = await RoutineExercise.create({
+            routineId: req.body.routineId,
+            exerciseId: req.body.exerciseId,
             name: req.body.name,
             sets: req.body.sets,
             reps: req.body.reps,
             weight: req.body.weight,
-            duration: req.body.duration,
-            routineId: routineId,
-           // exerciseId: exerciseId
+            duration: req.body.duration
         });
         return res.json({ routineExercise });
     } catch (error) {
         console.error(error);
-        return res.status(400).json({error});
+        return res.status(400).json({ error });
     }
 });
 
