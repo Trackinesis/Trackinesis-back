@@ -81,7 +81,7 @@ const Token = require('./src/main/backend/model/token')
 
 const {where} = require("sequelize");
 const TokenUtil = require("./src/main/backend/utils/tokenUtil");
-const { name } = require('ejs');
+
 
 
 app.post('/login', async (req, res) => {
@@ -296,7 +296,7 @@ app.post('/plan', async (req, res) => {
         return res.json( {id: plan.planId});
     } catch (error) {
         console.error(error);
-        return res.status(400).json("Error creating plan");
+        return res.status(400).json(error);
     }
 });
 
@@ -335,12 +335,13 @@ app.post('/planroutine', async (req, res) => {
             planId: req.body.planId,
             routineId: req.body.routineId
         });
-        return res.json({ routineExercise });
+        return res.json({ planRoutine });
     } catch (error) {
         console.error(error);
-        return res.status(400).json("Error creating exercise");
+        return res.status(400).json(error);
     }
 });
+
 
 app.post('/createroutine', async (req, res) => {
     try {
@@ -388,8 +389,8 @@ app.delete('/routine/:routineId', async (req, res) => {
 });
 
 app.post('/routineExercise', async (req, res) => {
-    const routineId = req.params.routineId
-    const exerciseId = req.params.exerciseId
+   const routineId = req.params.routineId
+   // const exerciseId = req.params.exerciseId
     try {
         const routineExercise = await RoutineExercise.create({
             name: req.body.name,
@@ -398,12 +399,12 @@ app.post('/routineExercise', async (req, res) => {
             weight: req.body.weight,
             duration: req.body.duration,
             routineId: routineId,
-            exerciseId: exerciseId
+           // exerciseId: exerciseId
         });
         return res.json({ routineExercise });
     } catch (error) {
         console.error(error);
-        return res.status(400).json("Error creating exercise");
+        return res.status(400).json({error});
     }
 });
 

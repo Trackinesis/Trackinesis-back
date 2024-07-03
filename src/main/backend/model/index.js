@@ -86,6 +86,27 @@ Exercise.hasMany(RoutineExercise, {
     onUpdate: 'CASCADE',
 });
 
+Routine.belongsToMany(Plan, {
+        through: PlanRoutine
+    }
+);
+
+Plan.belongsToMany(Routine, {
+    through: PlanRoutine
+}
+);
+
+Routine.belongsToMany(Exercise, {
+    through: RoutineExercise
+}
+);
+
+Exercise.belongsToMany(Routine, {
+    through: RoutineExercise
+}
+);
+
+
 module.exports = {
     Signup,
     User,
