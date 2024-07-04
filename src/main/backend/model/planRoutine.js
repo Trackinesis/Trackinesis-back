@@ -1,7 +1,5 @@
 const { DataTypes } = require('sequelize');
 const db = require('../utils/database');
-const Plan = require("./plan");
-const Routine = require("./routine");
 
 const PlanRoutine = db.define('planRoutine', {
     planRoutineId: {
@@ -14,9 +12,5 @@ const PlanRoutine = db.define('planRoutine', {
     freezeTableName: true
 });
 
-/*PlanRoutine.associate = model => {
-    PlanRoutine.belongsTo(model.plan, { foreignKey: 'planId' });
-    PlanRoutine.belongsTo(model.routine, { foreignKey: 'routineId' });
-}*/
 
 module.exports = PlanRoutine;
