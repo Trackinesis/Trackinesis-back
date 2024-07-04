@@ -319,8 +319,18 @@ app.post('/plan', async (req, res) => {
 });
 
 app.get('/plan', async (req, res) => {
+    const { userId } = req.query;
+
+    if (!userId) {
+        return res.status(400).json({ message: 'UserId is required' });
+    }
+
     try {
-        const plans = await Plan.findAll();
+        const plans = await Plan.findAll({
+            where: {
+                userId: userId
+            }
+        });
         res.json(plans);
     } catch (error) {
         console.error('Error fetching plans:', error);
