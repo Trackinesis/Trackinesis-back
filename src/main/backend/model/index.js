@@ -50,6 +50,15 @@ Signup.hasMany(Plan, {
     onUpdate: 'CASCADE',
 });
 
+Signup.hasMany(Routine, {
+    foreignKey: {
+        name: 'userId',
+        allowNull: false,
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+});
+
 Plan.hasMany(PlanRoutine, {
     foreignKey: {
       name: 'planId',

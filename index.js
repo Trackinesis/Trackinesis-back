@@ -372,23 +372,38 @@ app.post('/planroutine', async (req, res) => {
 
 
 app.post('/createroutine', async (req, res) => {
+    const userId = req.body.userId;
+    if (!userId) {
+        return res.status(400).json({ message: 'User ID is required' });
+    }
     try {
         const routine = await Routine.create({
             name: req.body.name,
             day: req.body.day,
             type: req.body.type,
-            description: req.body.description
+            description: req.body.description,
+            userId: userId
         });
-        return res.json( {id: routine.routineId} );
+        return res.json({ id: routine.routineId });
     } catch (error) {
         console.error(error);
-        return res.status(400).json("Error creating routine");
+        return res.status(400).json(error);
     }
 });
 
 app.get('/routine', async (req, res) => {
+    const userId = req.query.userId;
     try {
-        const routines = await Routine.findAll();
+        let routines;
+
+        if (userId) {
+            routines = await Routine.findAll({
+                where: { userId: userId }
+            });
+        } else {
+            routines = await Routine.findAll();
+        }
+
         res.json(routines);
     } catch (error) {
         console.error('Error fetching routines:', error);
