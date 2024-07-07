@@ -361,12 +361,39 @@ app.post('/planroutine', async (req, res) => {
     try {
         const planRoutine = await PlanRoutine.create({
             planId: req.body.planId,
-            routineId: req.body.routineId
+            routineId: req.body.routineId,
+            day: req.body.day
         });
         return res.json({ planRoutine });
     } catch (error) {
         console.error(error);
         return res.status(400).json(error);
+    }
+});
+
+app.get('/planroutine', async (req, res) => {
+    const { planId, day } = req.query;
+
+    if (!planId || !day) {
+        return res.status(400).json({ message: 'PlanId and day are required' });
+    }
+
+    try {
+        const routines = await PlanRoutine.findAll({
+            where: {
+                planId: planId,
+                day: day
+            }
+        });
+
+        if (routines.length === 0) {
+            return res.status(404).json({ message: error });
+        }
+
+        res.json(routines);
+    } catch (error) {
+        console.error('Error fetching routines:', error);
+        res.status(500).json(error);
     }
 });
 
