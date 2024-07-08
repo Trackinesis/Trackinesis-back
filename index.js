@@ -418,6 +418,7 @@ app.post('/createroutine', async (req, res) => {
     }
 });
 
+
 app.get('/routine', async (req, res) => {
     const userId = req.query.userId;
     try {
