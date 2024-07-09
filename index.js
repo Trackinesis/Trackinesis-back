@@ -230,21 +230,20 @@ app.post('/signupsteptwo', async (req, res) => {
 });
 
 app.post('/signupsteptwo/:userId', async (req, res) => {
-    const userId = parseInt(req.params.userId);
-    const { maxBench, maxSquat, maxDeadlift, strenghtRatio } = req.body;
+    const userId = parseInt(req.params.userId); // Cambié a req.params.userId
+    const { maxBench, maxSquat, maxDeadlift } = req.body; // Removí strenghtRatio ya que se calcula
 
     try {
-        const userToUpdate = await User.findByPk(userId);
+        const userToUpdate = await User.findOne({ where: { userId: userId } }); // Cambio de findByPk a findOne
         if (!userToUpdate) {
             return res.status(404).json({ error: 'user not found' });
         }
 
         const updatedStrengthRatio = userToUpdate.weight > 0
-      ? ((maxBench || userToUpdate.maxBench) + (maxSquat || userToUpdate.maxSquat) + (maxDeadlift || userToUpdate.maxDeadlift)) / userToUpdate.weight
-      : 0;
+            ? ((maxBench || userToUpdate.maxBench) + (maxSquat || userToUpdate.maxSquat) + (maxDeadlift || userToUpdate.maxDeadlift)) / userToUpdate.weight
+            : 0;
         
         const updatedUser = {
-            ...userToUpdate,
             maxBench: maxBench || userToUpdate.maxBench,
             maxSquat: maxSquat || userToUpdate.maxSquat,
             maxDeadlift: maxDeadlift || userToUpdate.maxDeadlift,
@@ -255,10 +254,10 @@ app.post('/signupsteptwo/:userId', async (req, res) => {
 
         res.status(200).json({ message: 'User maxes updated successfully', updatedUser });
     } catch (error) {
-        console.error('Error updating friend maxes:', error);
+        console.error('Error updating user maxes:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
-    });
+});
 
   app.get('/signupsteptwo/:userId', async (req, res) => {
     const userId = req.params.userId;
@@ -318,8 +317,8 @@ app.post('/plan', async (req, res) => {
     }
 });
 
-app.get('/plan', async (req, res) => {
-    const { userId } = req.query;
+app.get('/plan/:userId', async (req, res) => {
+    const userId = req.params.userId
 
     if (!userId) {
         return res.status(400).json({ message: 'UserId is required' });
@@ -361,8 +360,7 @@ app.post('/planroutine', async (req, res) => {
     try {
         const planRoutine = await PlanRoutine.create({
             planId: req.body.planId,
-            routineId: req.body.routineId,
-            day: req.body.day
+            routineId: req.body.routineId
         });
         return res.json({ planRoutine });
     } catch (error) {
@@ -371,35 +369,35 @@ app.post('/planroutine', async (req, res) => {
     }
 });
 
-app.get('/planroutine', async (req, res) => {
-    const { planId, day } = req.query;
+app.get('/planroutine/:planId', async (req, res) => {
+    const planId = req.params.planId;
 
-    if (!planId || !day) {
-        return res.status(400).json({ message: 'PlanId and day are required' });
+    if (!planId) {
+        return res.status(400).json({ message: 'PlanId is required' });
     }
 
     try {
         const routines = await PlanRoutine.findAll({
             where: {
-                planId: planId,
-                day: day
+                planId: planId
             }
         });
 
         if (routines.length === 0) {
-            return res.status(404).json({ message: error });
+            return res.status(404).json({ message: `No routines found for planId ${planId}` });
         }
 
         res.json(routines);
     } catch (error) {
         console.error('Error fetching routines:', error);
-        res.status(500).json(error);
+        res.status(500).json({ message: 'Error fetching routines', error });
     }
 });
 
 
 app.post('/createroutine', async (req, res) => {
     const userId = req.body.userId;
+
     if (!userId) {
         return res.status(400).json({ message: 'User ID is required' });
     }
@@ -436,6 +434,25 @@ app.get('/routine', async (req, res) => {
     } catch (error) {
         console.error('Error fetching routines:', error);
         res.status(500).json({ message: 'Error fetching routines' });
+    }
+});
+
+app.get('/routine/:day', async (req, res) => {
+    const day = req.params.day;
+
+    try {
+        const routine = await Routine.findOne({
+            where: { day }
+        });
+
+        if (routine) {
+            res.json({ routineId: routine.routineId });
+        } else {
+            res.json({ routineId: null });
+        }
+    } catch (error) {
+        console.error('Error fetching routine:', error);
+        res.status(500).json({ error: 'Error fetching routine' });
     }
 });
 
@@ -477,6 +494,65 @@ app.post('/routineExercise', async (req, res) => {
     }
 });
 
+app.post('/routineexercise/:routineExerciseId', async (req, res) => {
+    const routineExerciseId = req.params.routineExerciseId;
+    const updatedExerciseData = req.body;
+
+    try {
+        const exercise = await RoutineExercise.findByPk(routineExerciseId);
+
+        if (!exercise) {
+            return res.status(404).json({ error: 'Exercise not found' });
+        }
+
+        exercise.name = updatedExerciseData.name;
+        exercise.sets = updatedExerciseData.sets;
+        exercise.reps = updatedExerciseData.reps;
+        exercise.weight = updatedExerciseData.weight;
+        exercise.duration = updatedExerciseData.duration;
+
+        await exercise.save();
+
+        res.status(200).json({ message: 'Exercise updated successfully', exercise });
+    } catch (error) {
+        console.error('Error updating exercise:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/routineexercise/:routineId', async (req, res) => {
+    const routineId = req.params.routineId;
+    try {
+        const exercises = await RoutineExercise.findAll({
+            where: { routineId },
+            attributes: ['routineExerciseId', 'name', 'sets', 'reps', 'weight', 'duration']
+        });
+        res.json(exercises);
+    } catch (error) {
+        console.error('Error fetching routine exercises:', error);
+        res.status(500).json({ error: 'Error fetching routine exercises' });
+    }
+});
+
+app.delete('/routineexercise/:routineExerciseId', async (req, res) => {
+    const routineExerciseId = req.params.routineExerciseId;
+
+    try {
+        const exercise = await RoutineExercise.findByPk(routineExerciseId);
+
+        if (!exercise) {
+            return res.status(404).json({ error: 'Exercise not found' });
+        }
+
+        await exercise.destroy();
+
+        res.status(200).json({ message: 'Exercise deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting exercise:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.post('/exercise', async (req, res) => {
     try {
         await Exercise.create({
@@ -502,17 +578,19 @@ app.get('/exercise', async (req, res) => {
 });
 
 app.post('/goal', async (req, res) => {
+    const userId = req.body.userId;
+
     try {
         await Goal.create({
             name: req.body.name,
             description: req.body.description,
-            status: req.body.status
+            status: req.body.status,
+            userId: userId
         });
     } catch (error) {
         console.error(error);
         return res.status(400).json("Error creating")
     }
-
 });
 
 app.get('/goal', async (req, res) => {
@@ -566,13 +644,13 @@ app.post('/goal/:goalId', async (req, res) => {
     
   });
 
-  app.post('/friend', async (req, res) => {
+  app.post('/friend/:userId', async (req, res) => {
+    const userId = req.params.userId
+
     try {
         await Friend.create({
             name: req.body.name,
-            maxBench: req.body.maxBench,
-            maxSquat: req.body.maxSquat,
-            maxDeadlift: req.body.maxDeadlift
+            userId: userId
         });
     } catch (error) {
         console.error(error);

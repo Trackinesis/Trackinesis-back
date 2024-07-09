@@ -7,10 +7,6 @@ const PlanRoutine = db.define('planRoutine', {
         autoIncrement: true,
         primaryKey: true,
         allowNull: false
-    },
-    day: {
-        type: DataTypes.STRING,
-        allowNull: false
     }
 }, {
     freezeTableName: true

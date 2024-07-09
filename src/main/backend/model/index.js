@@ -95,7 +95,7 @@ Exercise.hasMany(RoutineExercise, {
     onUpdate: 'CASCADE',
 });
 
-Routine.belongsToMany(Plan, {
+/*Routine.belongsToMany(Plan, {
         through: PlanRoutine
     }
 );
@@ -113,7 +113,7 @@ Routine.belongsToMany(Exercise, {
 Exercise.belongsToMany(Routine, {
     through: RoutineExercise
 }
-);
+);*/
 
 
 module.exports = {
