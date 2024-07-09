@@ -1,3 +1,4 @@
+const sequelize = require('sequelize');
 const Signup = require('./signup');
 const User = require('./user');
 const Goal = require('./goal')
@@ -6,6 +7,7 @@ const Routine = require('./routine');
 const RoutineExercise = require('./routineExercise');
 const Exercise = require('./exercise');
 const Friend = require('./friend');
+const UserHistory = require('./userHistory');
 const PlanRoutine = require('./planRoutine');
 
 //Foo.hasOne(Bar, {
@@ -77,6 +79,21 @@ Routine.hasMany(PlanRoutine, {
     onUpdate: 'CASCADE',
 });
 
+
+//Maybe repeated
+Signup.hasOne(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+User.belongsTo(Signup, { foreignKey: 'userId'});
+
+Signup.hasMany(Plan, { foreignKey: 'userId'});
+Plan.belongsTo(Signup, { foreignKey: 'userId'});
+
+Plan.hasMany(Routine, { foreignKey: 'planId'});
+Routine.belongsTo(Plan, { foreignKey: 'planId'});
+
+Routine.hasMany(Exercise, {foreignKey: 'exerciseId'});
+Exercise.belongsTo(Routine, { foreignKey: 'exerciseId'});
+//---------
+
 Routine.hasMany(RoutineExercise, {
     foreignKey: {
       name: 'routineId',
@@ -114,6 +131,9 @@ Exercise.belongsToMany(Routine, {
     through: RoutineExercise
 }
 );*/
+
+Signup.hasMany(UserHistory, { foreignKey: 'userId' });
+UserHistory.belongsTo(Signup, { foreignKey: 'userId' });
 
 
 module.exports = {
