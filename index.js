@@ -259,7 +259,7 @@ app.post('/signupsteptwo/:userId', async (req, res) => {
         };
 
         await userToUpdate.update(updatedUser);
-        await UserHistory.create({userId, maxBench, maxSquat, maxDeadLift, strengthRatio})
+        await UserHistory.create({userId, maxBench, maxSquat, maxDeadLift})
 
         res.status(200).json({ message: 'User maxes updated successfully', updatedUser });
     } catch (error) {
