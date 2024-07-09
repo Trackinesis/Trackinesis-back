@@ -112,7 +112,7 @@ Exercise.hasMany(RoutineExercise, {
     onUpdate: 'CASCADE',
 });
 
-Routine.belongsToMany(Plan, {
+/*Routine.belongsToMany(Plan, {
         through: PlanRoutine
     }
 );
@@ -130,7 +130,7 @@ Routine.belongsToMany(Exercise, {
 Exercise.belongsToMany(Routine, {
     through: RoutineExercise
 }
-);
+);*/
 
 Signup.hasMany(UserHistory, { foreignKey: 'userId' });
 UserHistory.belongsTo(Signup, { foreignKey: 'userId' });
