@@ -382,7 +382,7 @@ app.post('/createroutine', async (req, res) => {
             day: req.body.day,
             type: req.body.type,
             description: req.body.description,
-            state: req.body.state
+            state: req.body.state,
             userId: userId
         });
         return res.json({ id: routine.routineId });
