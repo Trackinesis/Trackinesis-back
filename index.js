@@ -16,7 +16,11 @@ const routineExercise = require('./src/main/backend/routes/routineExercise');
 const exercises = require('./src/main/backend/routes/exercise');
 const goals = require('./src/main/backend/routes/goal');
 const friends = require('./src/main/backend/routes/friend');
+
+const userHistoryRoutes = require('./src/main/backend/routes/userHistory');
+
 //const tokens = require('./src/main/backend/routes/token');
+
 const cors = require('cors');
 
 app.use(cors({origin: 'http://localhost:3000'}));
@@ -50,6 +54,8 @@ app.use('./routine', routines);
 app.use('./routineExercise', routineExercise);
 app.use('/exercise', exercises);
 app.use('/goal', goals);
+app.use('/userHistory', userHistoryRoutes);
+
 app.use('/friend', friends);
 //app.use('/token', tokens)
 
@@ -81,6 +87,8 @@ const Token = require('./src/main/backend/model/token')
 
 const {where} = require("sequelize");
 const TokenUtil = require("./src/main/backend/utils/tokenUtil");
+const UserHistory = require("./src/main/backend/model/userHistory");
+//const { name } = require('ejs');
 
 
 
@@ -231,7 +239,7 @@ app.post('/signupsteptwo', async (req, res) => {
 
 app.post('/signupsteptwo/:userId', async (req, res) => {
     const userId = parseInt(req.params.userId);
-    const { maxBench, maxSquat, maxDeadlift, strenghtRatio } = req.body;
+    const { maxBench, maxSquat, maxDeadLift, strengthRatio } = req.body;
 
     try {
         const userToUpdate = await User.findByPk(userId);
@@ -240,18 +248,20 @@ app.post('/signupsteptwo/:userId', async (req, res) => {
         }
 
         const updatedStrengthRatio = userToUpdate.weight > 0
-      ? ((maxBench || userToUpdate.maxBench) + (maxSquat || userToUpdate.maxSquat) + (maxDeadlift || userToUpdate.maxDeadlift)) / userToUpdate.weight
+      ? ((maxBench || userToUpdate.maxBench) + (maxSquat || userToUpdate.maxSquat) + (maxDeadLift || userToUpdate.maxDeadLift)) / userToUpdate.weight
       : 0;
+
         
         const updatedUser = {
             ...userToUpdate,
             maxBench: maxBench || userToUpdate.maxBench,
             maxSquat: maxSquat || userToUpdate.maxSquat,
-            maxDeadlift: maxDeadlift || userToUpdate.maxDeadlift,
-            strenghtRatio: updatedStrengthRatio,
+            maxDeadLift: maxDeadLift || userToUpdate.maxDeadLift,
+            strengthRatio: updatedStrengthRatio,
         };
 
         await userToUpdate.update(updatedUser);
+        await UserHistory.create({userId, maxBench, maxSquat, maxDeadLift, strengthRatio})
 
         res.status(200).json({ message: 'User maxes updated successfully', updatedUser });
     } catch (error) {
@@ -653,7 +663,57 @@ app.post ('/createroutine', async (req, res) => {
         console.error(error);
         res.status(500).send('Server error');
     }
-})
+});
+
+app.put('/user/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    const { maxBench, maxSquat, maxDeadLift, strengthRatio} = req.body;
+
+    try {
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(200).json({ error: 'User not found'});
+
+        }
+        await user.update({ maxBench, maxSquat, maxDeadLift, strengthRatio});
+        await UserHistory.create({userId, maxBench, maxSquat, maxDeadLift, strengthRatio});
+
+    } catch (e) {
+        console.log('Error updating user:', e);
+        res.status(500).json({error: 'Internal server error'});
+    }
+});
+
+app.get('/userHistory/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const history = await UserHistory.findAll({
+            where: { userId: userId }
+        });
+        res.json(history);
+    } catch (error) {
+        console.error('Error fetching user history:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+app.get('/userHistory/graph/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const userHistory = await UserHistory.findAll({
+            where: { userId },
+            order: [['date', 'ASC']]
+        });
+
+        res.json({ userHistory });
+
+    } catch (error) {
+        console.error('Error fetching user history', error);
+        res.status(500).send('Internal server error');
+    }
+});
+
 
 app.listen(8081, () => {
     console.log('Server is running on port 8081');

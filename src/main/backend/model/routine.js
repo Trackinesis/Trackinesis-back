@@ -3,6 +3,7 @@ const db = require('../utils/database');
 const PlanRoutine = require("./planRoutine");
 const Plan = require("./plan");
 
+
 const Routine = db.define('routine', {
     routineId: {
         type: DataTypes.INTEGER,
@@ -33,8 +34,5 @@ const Routine = db.define('routine', {
 }, {
     freezeTableName: true
 });
-
-
-
 
 module.exports = Routine;
