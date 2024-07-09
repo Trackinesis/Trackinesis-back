@@ -16,6 +16,7 @@ const routineExercise = require('./src/main/backend/routes/routineExercise');
 const exercises = require('./src/main/backend/routes/exercise');
 const goals = require('./src/main/backend/routes/goal');
 const friends = require('./src/main/backend/routes/friend');
+const userHistoryRoutes = require('./src/main/backend/routes/userHistory');
 
 const cors = require('cors');
 
@@ -40,6 +41,7 @@ app.use('./routine', routines);
 app.use('./routineExercise', routineExercise);
 app.use('/exercise', exercises);
 app.use('/goal', goals);
+app.use('/userHistory', userHistoryRoutes);
 
 app.use('/friend', friends);
 //app.use('/token', tokens)
@@ -637,6 +639,25 @@ app.get('/userHistory/:userId', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+app.get('/userHistory/graph/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const userHistory = await UserHistory.findAll({
+            where: { userId },
+            order: [['date', 'ASC']]
+        });
+
+        res.json({ userHistory });
+
+    } catch (error) {
+        console.error('Error fetching user history', error);
+        res.status(500).send('Internal server error');
+    }
+});
+
+
 
 app.listen(8081, () => {
     console.log('Server is running on port 8081');
