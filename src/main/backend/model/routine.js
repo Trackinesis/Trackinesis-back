@@ -25,6 +25,10 @@ const Routine = db.define('routine', {
     description: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    state: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 }, {
     freezeTableName: true

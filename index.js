@@ -382,6 +382,7 @@ app.post('/createroutine', async (req, res) => {
             day: req.body.day,
             type: req.body.type,
             description: req.body.description,
+            state: req.body.state
             userId: userId
         });
         return res.json({ id: routine.routineId });
@@ -587,6 +588,72 @@ app.delete('/friend/:friendId', async (req, res) => {
 app.get('/home', (req, res) => {
     res.send('Welcome to the home page');
 });
+
+//----------------
+app.get('/routine/:routineId', async (req, res) => {
+    const routineId = req.params.routineId
+    try {
+        const routine = await Routine.findByPk(routineId);
+        if (routine) {
+            res.json(routine);
+        } else {
+            res.status(404).json({ message: 'Routine not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching routine:', error);
+        res.status(500).json({ error });
+    }
+});
+
+app.get('friends/:userId', async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const friends = await Friend.findOne({
+            where: {
+                friendId: friendId,
+                userId: userId
+            }
+        });
+        res.json(friends);
+
+    } catch (error) {
+        console.error('Error fetching friends:', error);
+        res.status(500).json({ error });
+    }
+});
+
+app.post ('/createroutine', async (req, res) => {
+
+    const routineId  = req.body.routineId;
+    const userId = req.body.userId;
+
+    try {
+        const originalRoutine = await Routine.findByPk(routineId);
+
+        if (!originalRoutine) {
+            return res.status(404).send('Routine not found');
+        }
+
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        const newRoutine = await Routine.create({
+            name: originalRoutine.name,
+            description: originalRoutine.description,
+            startDate: originalRoutine.startDate,
+            endDate: originalRoutine.endDate,
+            userId: userId
+        });
+
+        res.status(200).send('Routine copied successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+})
 
 app.listen(8081, () => {
     console.log('Server is running on port 8081');
