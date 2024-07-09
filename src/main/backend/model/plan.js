@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const db = require('../utils/database');
 const Signup = require("./signup");
 const PlanRoutine = require("./planRoutine");
+const Routine = require("./routine");
 
 const Plan = db.define('plan', {
     planId: {
@@ -34,9 +35,6 @@ const Plan = db.define('plan', {
     freezeTableName: true
 });
 
-/*Plan.associate = model => {
-    Plan.belongsTo(model.signup, { foreignKey: 'userId' });
-    Plan.hasMany(model.planRoutine, { foreignKey: 'planId' });
-}*/
+
 
 module.exports = Plan;

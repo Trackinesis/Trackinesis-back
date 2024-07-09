@@ -16,7 +16,7 @@ const routineExercise = require('./src/main/backend/routes/routineExercise');
 const exercises = require('./src/main/backend/routes/exercise');
 const goals = require('./src/main/backend/routes/goal');
 const friends = require('./src/main/backend/routes/friend');
-
+//const tokens = require('./src/main/backend/routes/token');
 const cors = require('cors');
 
 app.use(cors({origin: 'http://localhost:3000'}));
@@ -29,6 +29,16 @@ app.use(session({
 }));
 app.use(express.urlencoded({extended: true}));
 
+function generateRandomInt(min, max) {
+    const range = max - min;
+    const randomNumber = Math.random();
+    const scaledFloat = randomNumber * range;
+    const randomInt = Math.floor(scaledFloat);
+    const finalRandomInt = randomInt + min;
+    return finalRandomInt;
+  }
+  const randomInt = generateRandomInt(1, 1000000);
+
 //-----------------USEAGES------------------
 app.use('/', logins);
 app.use('/logout', logouts);
@@ -40,9 +50,9 @@ app.use('./routine', routines);
 app.use('./routineExercise', routineExercise);
 app.use('/exercise', exercises);
 app.use('/goal', goals);
-
 app.use('/friend', friends);
 //app.use('/token', tokens)
+
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
 (async () => {
@@ -61,7 +71,7 @@ const Models = require('./src/main/backend/model/index');
 const Signup = require('./src/main/backend/model/signup');
 const User = require('./src/main/backend/model/user');
 const Plan = require('./src/main/backend/model/plan');
-const PlanRoutine = require('./src/main/backend/model/planRoutine')
+const PlanRoutine = require('./src/main/backend/model/planRoutine');
 const Routine = require('./src/main/backend/model/routine');
 const RoutineExercise = require('./src/main/backend/model/routineExercise');
 const Exercise = require('./src/main/backend/model/exercise');
@@ -71,7 +81,7 @@ const Token = require('./src/main/backend/model/token')
 
 const {where} = require("sequelize");
 const TokenUtil = require("./src/main/backend/utils/tokenUtil");
-//const { name } = require('ejs');
+
 
 
 app.post('/login', async (req, res) => {
@@ -162,21 +172,20 @@ app.get('/token/:token', async (req, res) => {
     } catch (error) {
         console.error('Error fetching users:', error);
         res.status(500).json({ message: 'Error fetching users' });
-
     }
 });
 
 app.post('/signup', async (req, res) => {
+    const userId = randomInt
     try {
-        const user = await User.create()
         await Signup.create({
             name: req.body.name,
             surname: req.body.surname,
             email: req.body.email,
             password: req.body.password,
-            userId: user.id
+            userId: userId
         });
-        return res.json({ id: user.id });
+        return res.json({ id: userId });
     } catch (error) {
         console.error(error);
         return res.status(400).json(error);
@@ -204,31 +213,19 @@ app.delete('/signup/:userId', async (req, res) => {
 });
 
 app.post('/signupsteptwo', async (req, res) => {
+    const userId = req.body.userId;
     try {
-        const userId = req.body.userId;
-
-        if (!userId) {
-            return res.status(400).json({userId});
-        }
-
-        const [numRowsUpdatedUser] = await User.update({
-                age: req.body.age,
-                weight: req.body.weight,
-                height: req.body.height,
-                gender: req.body.gender
-            },
-            { where: { id: userId } }
-        );
-
-        if (numRowsUpdatedUser === 1) {
-            return res.json("Profile created successfully");
-        }
-        else {
-            return res.status(400).json("User not found for update.");
-        }
+        await User.create({
+            age: req.body.age,
+            weight: req.body.weight,
+            height: req.body.height,
+            gender: req.body.gender,
+            userId: userId
+        });
+        return res.json({ id: userId });
     } catch (error) {
         console.error(error);
-        return res.status(400).json("Error creating profile");
+        return res.status(400).json(error);
     }
 });
 
@@ -263,7 +260,6 @@ app.post('/signupsteptwo/:userId', async (req, res) => {
     }
     });
 
-
   app.get('/signupsteptwo/:userId', async (req, res) => {
     const userId = req.params.userId;
     try {
@@ -274,7 +270,6 @@ app.post('/signupsteptwo/:userId', async (req, res) => {
         res.status(500).json({ message: 'Error fetching users' });
     }
 });
-
 
 app.get('/signupsteptwo', async (req, res) => {
     try {
@@ -305,25 +300,37 @@ app.get('/home/:userId', async (req, res) => {
 });  
 
 app.post('/plan', async (req, res) => {
+    const userId = req.body.userId
     try {
-        await Plan.create({
+        const plan = await Plan.create({
             name: req.body.name,
             type: req.body.type,
             description: req.body.description,
             objective: req.body.objective,
             startDate: req.body.startDate,
-            endDate: req.body.endDate
+            endDate: req.body.endDate,
+            userId: userId
         });
-        return res.json("Plan created successfully");
+        return res.json( {id: plan.planId});
     } catch (error) {
         console.error(error);
-        return res.status(400).json("Error creating plan");
+        return res.status(400).json(error);
     }
 });
 
 app.get('/plan', async (req, res) => {
+    const { userId } = req.query;
+
+    if (!userId) {
+        return res.status(400).json({ message: 'UserId is required' });
+    }
+
     try {
-        const plans = await Plan.findAll();
+        const plans = await Plan.findAll({
+            where: {
+                userId: userId
+            }
+        });
         res.json(plans);
     } catch (error) {
         console.error('Error fetching plans:', error);
@@ -332,8 +339,7 @@ app.get('/plan', async (req, res) => {
 });
 
 app.delete('/plan/:planId', async (req, res) => {
-    const planId = req.params.planId;
-
+    const planId = req.params.planId;   
     try {
         const deletedPlan = await Plan.findByPk(planId);
 
@@ -351,25 +357,54 @@ app.delete('/plan/:planId', async (req, res) => {
     }
 });
 
-app.post('/createroutine', async (req, res) => {
+app.post('/planroutine', async (req, res) => {
     try {
-        await Routine.create({
+        const planRoutine = await PlanRoutine.create({
+            planId: req.body.planId,
+            routineId: req.body.routineId
+        });
+        return res.json({ planRoutine });
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json(error);
+    }
+});
+
+
+app.post('/createroutine', async (req, res) => {
+    const userId = req.body.userId;
+    if (!userId) {
+        return res.status(400).json({ message: 'User ID is required' });
+    }
+    try {
+        const routine = await Routine.create({
             name: req.body.name,
             day: req.body.day,
             type: req.body.type,
             description: req.body.description,
             state: req.body.state
+            userId: userId
         });
-        return res.json("Routine created successfully");
+        return res.json({ id: routine.routineId });
     } catch (error) {
         console.error(error);
-        return res.status(400).json("Error creating routine");
+        return res.status(400).json(error);
     }
 });
 
 app.get('/routine', async (req, res) => {
+    const userId = req.query.userId;
     try {
-        const routines = await Routine.findAll();
+        let routines;
+
+        if (userId) {
+            routines = await Routine.findAll({
+                where: { userId: userId }
+            });
+        } else {
+            routines = await Routine.findAll();
+        }
+
         res.json(routines);
     } catch (error) {
         console.error('Error fetching routines:', error);
@@ -397,6 +432,24 @@ app.delete('/routine/:routineId', async (req, res) => {
     }
 });
 
+app.post('/routineExercise', async (req, res) => {
+    try {
+        const routineExercise = await RoutineExercise.create({
+            routineId: req.body.routineId,
+            exerciseId: req.body.exerciseId,
+            name: req.body.name,
+            sets: req.body.sets,
+            reps: req.body.reps,
+            weight: req.body.weight,
+            duration: req.body.duration
+        });
+        return res.json({ routineExercise });
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json({ error });
+    }
+});
+
 app.post('/exercise', async (req, res) => {
     try {
         await Exercise.create({
@@ -418,27 +471,6 @@ app.get('/exercise', async (req, res) => {
     } catch (error) {
         console.error('Error fetching exercises:', error);
         res.status(500).json({ message: 'Error fetching exercises' });
-    }
-});
-
-app.post('/routineExercise', async (req, res) => {
-    try {
-        const routine = await Routine.findOne( where(routineId = req.body.routineId) )
-        const exercise = await Exercise.findOne( where(exerciseId = req.body.exerciseId) )
-
-        const routineExercise = await RoutineExercise.create({
-            name: req.body.name,
-            sets: req.body.sets,
-            reps: req.body.reps,
-            weight: req.body.weight,
-            duration: req.body.duration,
-        });
-        await routineExercise.addRoutine(routine)
-        await routineExercise.addExercise(exercise)
-        return res.json({ routineExercise });
-    } catch (error) {
-        console.error(error);
-        return res.status(400).json("Error creating exercise");
     }
 });
 
@@ -556,6 +588,7 @@ app.delete('/friend/:friendId', async (req, res) => {
 app.get('/home', (req, res) => {
     res.send('Welcome to the home page');
 });
+
 //----------------
 app.get('/routine/:routineId', async (req, res) => {
     const routineId = req.params.routineId
@@ -621,9 +654,6 @@ app.post ('/createroutine', async (req, res) => {
         res.status(500).send('Server error');
     }
 })
-
-
-
 
 app.listen(8081, () => {
     console.log('Server is running on port 8081');
