@@ -8,6 +8,7 @@ const Routine = require('./routine');
 const RoutineExercise = require('./routineExercise');
 const Exercise = require('./exercise');
 const Friend = require('./friend');
+const UserHistory = require('./userHistory');
 
 Signup.hasMany(Goal, { foreignKey: 'userId', onDelete: 'Cascade' }) //TODO hasMany
 Goal.belongsTo(Signup, { foreignKey: 'userId'})
@@ -26,6 +27,9 @@ Routine.belongsTo(Plan, { foreignKey: 'planId'});
 
 Routine.hasMany(Exercise, {foreignKey: 'exerciseId'});
 Exercise.belongsTo(Routine, { foreignKey: 'exerciseId'});
+
+Signup.hasMany(UserHistory, { foreignKey: 'userId' });
+UserHistory.belongsTo(Signup, { foreignKey: 'userId' });
 
 
 module.exports = {

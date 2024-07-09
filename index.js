@@ -71,7 +71,7 @@ const Token = require('./src/main/backend/model/token')
 
 const {where} = require("sequelize");
 const TokenUtil = require("./src/main/backend/utils/tokenUtil");
-const UserHistory = require("./src/main/backend/model/UserHistory");
+const UserHistory = require("./src/main/backend/model/userHistory");
 //const { name } = require('ejs');
 
 
@@ -608,7 +608,7 @@ app.post ('/createroutine', async (req, res) => {
 
 app.put('/user/:userId', async (req, res) => {
     const userId = req.params.userId;
-    const { maxBench, maxSquat, maxDeadlift, strengthRatio} = req.body;
+    const { maxBench, maxSquat, maxDeadLift, strengthRatio} = req.body;
 
     try {
         const user = await User.findByPk(userId);
@@ -616,12 +616,25 @@ app.put('/user/:userId', async (req, res) => {
             return res.status(200).json({ error: 'User not found'});
 
         }
-        await user.update({ maxBench, maxSquat, maxDeadlift, strengthRatio});
-        await UserHistory.create({userId, maxBench, maxSquat, maxDeadlift, strengthRatio});
+        await user.update({ maxBench, maxSquat, maxDeadLift, strengthRatio});
+        await UserHistory.create({userId, maxBench, maxSquat, maxDeadLift, strengthRatio});
 
     } catch (e) {
         console.log('Error updating user:', e);
         res.status(500).json({error: 'Internal server error'});
+    }
+});
+
+app.get('/userHistory/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const history = await UserHistory.findAll({
+            where: { userId: userId }
+        });
+        res.json(history);
+    } catch (error) {
+        console.error('Error fetching user history:', error);
+        res.status(500).send('Internal Server Error');
     }
 });
 
