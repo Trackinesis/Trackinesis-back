@@ -80,20 +80,6 @@ Routine.hasMany(PlanRoutine, {
 });
 
 
-//Maybe repeated
-Signup.hasOne(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
-User.belongsTo(Signup, { foreignKey: 'userId'});
-
-Signup.hasMany(Plan, { foreignKey: 'userId'});
-Plan.belongsTo(Signup, { foreignKey: 'userId'});
-
-Plan.hasMany(Routine, { foreignKey: 'planId'});
-Routine.belongsTo(Plan, { foreignKey: 'planId'});
-
-Routine.hasMany(Exercise, {foreignKey: 'exerciseId'});
-Exercise.belongsTo(Routine, { foreignKey: 'exerciseId'});
-//---------
-
 Routine.hasMany(RoutineExercise, {
     foreignKey: {
       name: 'routineId',
