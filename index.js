@@ -33,15 +33,7 @@ app.use(session({
 }));
 app.use(express.urlencoded({extended: true}));
 
-function generateRandomInt(min, max) {
-    const range = max - min;
-    const randomNumber = Math.random();
-    const scaledFloat = randomNumber * range;
-    const randomInt = Math.floor(scaledFloat);
-    const finalRandomInt = randomInt + min;
-    return finalRandomInt;
-  }
-  const randomInt = generateRandomInt(1, 1000000);
+  const randomInt = Math.floor(Math.random()*100000);
 
 //-----------------USEAGES------------------
 app.use('/', logins);
@@ -184,7 +176,7 @@ app.get('/token/:token', async (req, res) => {
 });
 
 app.post('/signup', async (req, res) => {
-    const userId = randomInt
+    const userId = randomInt;
     try {
         await Signup.create({
             name: req.body.name,
