@@ -646,19 +646,21 @@ app.post('/goal/:goalId', async (req, res) => {
     
   });
 
-  app.post('/friend/:userId', async (req, res) => {
-    const userId = req.params.userId
+app.post('/friend/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { friendId, name } = req.body.params;
 
     try {
-        await Friend.create({
-            name: req.body.name,
+        const newFriend = await Friend.create({
+            followedId: friendId,
+            followedName: name,
             userId: userId
         });
+        return res.status(201).json(newFriend);
     } catch (error) {
         console.error(error);
-        return res.status(400).json("Error creating")
+        return res.status(400).json({ message: "Error creating friend" });
     }
-
 });
 
 app.get('/friend', async (req, res) => {
