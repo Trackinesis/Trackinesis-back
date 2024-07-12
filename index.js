@@ -663,9 +663,11 @@ app.post('/friend/:userId', async (req, res) => {
     }
 });
 
-app.get('/friend', async (req, res) => {
+app.get('/friend/:userId', async (req, res) => {
+    const userId = req.params.userId
     try {
         const friends = await Friend.findAll({
+            where: { userId: userId},
             attributes: ['userFriendId', 'followedId', 'followedName'] // Specify attributes to retrieve
         });
         res.json(friends);
