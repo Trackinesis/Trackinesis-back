@@ -665,7 +665,9 @@ app.post('/friend/:userId', async (req, res) => {
 
 app.get('/friend', async (req, res) => {
     try {
-        const friends = await Friend.findAll();
+        const friends = await Friend.findAll({
+            attributes: ['userFriendId', 'followedId', 'followedName'] // Specify attributes to retrieve
+        });
         res.json(friends);
     } catch (error) {
         console.error('Error fetching friends:', error);
@@ -675,18 +677,17 @@ app.get('/friend', async (req, res) => {
 
 app.delete('/friend/:friendId', async (req, res) => {
     const friendId = req.params.friendId;
-
     try {
-        const deleteFriend = await Friend.findByPk(friendId);
-
+        const deleteFriend = await Friend.findOne({
+            where: {
+                followedId: friendId
+            }
+        });
         if (!deleteFriend) {
             return res.status(404).json({ error: 'Friend not found' });
         }
-
         await deleteFriend.destroy()
-
         res.status(200).json({ message: 'Friend deleted successfully', deleteFriend });
-
     } catch (error) {
         console.error('Error deleting friend:', error);
         res.status(500).json({ error: 'Internal server error' });
