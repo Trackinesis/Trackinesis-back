@@ -682,7 +682,7 @@ app.delete('/friend/:friendId', async (req, res) => {
     try {
         const deleteFriend = await Friend.findOne({
             where: {
-                followedId: friendId
+                userFriendId: friendId
             }
         });
         if (!deleteFriend) {
@@ -702,10 +702,11 @@ app.get('/home', (req, res) => {
 });
 
 //----------------
-app.get('/routine/:routineId', async (req, res) => {
-    const routineId = req.params.routineId
+app.get('routine/:routineId', async (req, res) => {
+    const routineId = req.params.routineId;
     try {
         const routine = await Routine.findByPk(routineId);
+        console.log("this is the routine to res: ", routine);
         if (routine) {
             res.json(routine);
         } else {
