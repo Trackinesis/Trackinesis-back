@@ -419,8 +419,8 @@ app.post('/createroutine', async (req, res) => {
 });
 
 
-app.get('/routine', async (req, res) => {
-    const userId = req.query.userId;
+app.get('/routine/get/:userId', async (req, res) => {
+    const userId = req.params.userId;
     try {
         let routines;
 
