@@ -33,7 +33,7 @@ app.use(session({
 }));
 app.use(express.urlencoded({extended: true}));
 
-  const randomInt = Math.floor(Math.random()*100000);
+  //const randomInt = Math.floor(Math.random()*100000);
 
 //-----------------USEAGES------------------
 app.use('/', logins);
@@ -176,7 +176,7 @@ app.get('/token/:token', async (req, res) => {
 });
 
 app.post('/signup', async (req, res) => {
-    const userId = randomInt;
+    const userId = Math.floor(Math.random()*100000);
     try {
         await Signup.create({
             name: req.body.name,
