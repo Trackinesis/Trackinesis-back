@@ -702,19 +702,20 @@ app.get('/home', (req, res) => {
 });
 
 //----------------
-app.get('routine/:routineId', async (req, res) => {
-    const routineId = req.params.routineId;
+app.get('/routine/find/:routineId', async (req, res) => {
+    const routineId = parseInt(req.params.routineId);
+    if (isNaN(routineId)) {
+        return res.status(400).json({ error: 'Invalid routine ID' });
+    }
     try {
         const routine = await Routine.findByPk(routineId);
-        console.log("this is the routine to res: ", routine);
-        if (routine) {
-            res.json(routine);
-        } else {
-            res.status(404).json({ message: 'Routine not found' });
+        if (!routine) {
+            return res.status(404).json({ message: 'Routine not found' });
         }
+        res.status(200).json(routine);
     } catch (error) {
         console.error('Error fetching routine:', error);
-        res.status(500).json({ error });
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
