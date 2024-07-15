@@ -33,15 +33,7 @@ app.use(session({
 }));
 app.use(express.urlencoded({extended: true}));
 
-function generateRandomInt(min, max) {
-    const range = max - min;
-    const randomNumber = Math.random();
-    const scaledFloat = randomNumber * range;
-    const randomInt = Math.floor(scaledFloat);
-    const finalRandomInt = randomInt + min;
-    return finalRandomInt;
-  }
-  const randomInt = generateRandomInt(1, 1000000);
+  //const randomInt = Math.floor(Math.random()*100000);
 
 //-----------------USEAGES------------------
 app.use('/', logins);
@@ -184,7 +176,7 @@ app.get('/token/:token', async (req, res) => {
 });
 
 app.post('/signup', async (req, res) => {
-    const userId = randomInt
+    const userId = Math.floor(Math.random()*100000);
     try {
         await Signup.create({
             name: req.body.name,
@@ -427,8 +419,8 @@ app.post('/createroutine', async (req, res) => {
 });
 
 
-app.get('/routine', async (req, res) => {
-    const userId = req.query.userId;
+app.get('/routine/get/:userId', async (req, res) => {
+    const userId = req.params.userId;
     try {
         let routines;
 
@@ -654,24 +646,30 @@ app.post('/goal/:goalId', async (req, res) => {
     
   });
 
-  app.post('/friend/:userId', async (req, res) => {
-    const userId = req.params.userId
+app.post('/friend/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { friendId, name } = req.body.params;
 
     try {
-        await Friend.create({
-            name: req.body.name,
+        const newFriend = await Friend.create({
+            followedId: friendId,
+            followedName: name,
             userId: userId
         });
+        return res.status(201).json(newFriend);
     } catch (error) {
         console.error(error);
-        return res.status(400).json("Error creating")
+        return res.status(400).json({ message: "Error creating friend" });
     }
-
 });
 
-app.get('/friend', async (req, res) => {
+app.get('/friend/:userId', async (req, res) => {
+    const userId = req.params.userId
     try {
-        const friends = await Friend.findAll();
+        const friends = await Friend.findAll({
+            where: { userId: userId},
+            attributes: ['userFriendId', 'followedId', 'followedName'] // Specify attributes to retrieve
+        });
         res.json(friends);
     } catch (error) {
         console.error('Error fetching friends:', error);
@@ -681,18 +679,17 @@ app.get('/friend', async (req, res) => {
 
 app.delete('/friend/:friendId', async (req, res) => {
     const friendId = req.params.friendId;
-
     try {
-        const deleteFriend = await Friend.findByPk(friendId);
-
+        const deleteFriend = await Friend.findOne({
+            where: {
+                userFriendId: friendId
+            }
+        });
         if (!deleteFriend) {
             return res.status(404).json({ error: 'Friend not found' });
         }
-
         await deleteFriend.destroy()
-
         res.status(200).json({ message: 'Friend deleted successfully', deleteFriend });
-
     } catch (error) {
         console.error('Error deleting friend:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -705,18 +702,20 @@ app.get('/home', (req, res) => {
 });
 
 //----------------
-app.get('/routine/:routineId', async (req, res) => {
-    const routineId = req.params.routineId
+app.get('/routine/find/:routineId', async (req, res) => {
+    const routineId = parseInt(req.params.routineId);
+    if (isNaN(routineId)) {
+        return res.status(400).json({ error: 'Invalid routine ID' });
+    }
     try {
         const routine = await Routine.findByPk(routineId);
-        if (routine) {
-            res.json(routine);
-        } else {
-            res.status(404).json({ message: 'Routine not found' });
+        if (!routine) {
+            return res.status(404).json({ message: 'Routine not found' });
         }
+        res.status(200).json(routine);
     } catch (error) {
         console.error('Error fetching routine:', error);
-        res.status(500).json({ error });
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
