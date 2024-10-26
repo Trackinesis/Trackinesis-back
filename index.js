@@ -718,6 +718,43 @@ app.get('/routine/find/:routineId', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+app.get('/routine/findByName/:routineName', async (req, res) => {
+    const routineName = req.params.routineName;
+    try {
+        const routines = await Routine.findAll({
+            where: { name: routineName },
+        });
+        if (routines.length === 0) {
+            return res.status(404).json({ message: 'No routines found with this name' });
+        }
+        res.status(200).json(routines);
+    } catch (error) {
+        console.error('Error fetching routines by name:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/routine/findByCreator/:creatorId', async (req, res) => {
+    const creatorId = parseInt(req.params.creatorId);
+    if (isNaN(creatorId)) {
+        return res.status(400).json({ error: 'Invalid creator ID' });
+    }
+    try {
+        const routines = await Routine.findAll({
+            where: { userId: creatorId },
+        });
+        if (routines.length === 0) {
+            return res.status(404).json({ message: 'No routines found for this creator' });
+        }
+        res.status(200).json(routines);
+    } catch (error) {
+        console.error('Error fetching routines by creator:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
+
 
 app.get('friends/:userId', async (req, res) => {
     const userId = req.params.userId;
