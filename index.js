@@ -555,29 +555,57 @@ app.delete('/routineexercise/:routineExerciseId', async (req, res) => {
     }
 });
 
-app.post('/exercise', async (req, res) => {
+// ------------EXERCISE
+const multer = require('multer');
+
+// Configuración de almacenamiento en memoria
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+
+// Endpoint para crear un ejercicio
+app.post('/exercise', upload.single('file'), async (req, res) => {
     try {
-        await Exercise.create({
-            name: req.body.name,
-            type: req.body.type,
-            description: req.body.description
+        const { name, type, description } = req.body;
+        const image = req.file ? req.file.buffer : null; // Obtiene la imagen del cuerpo de la solicitud
+
+        const newExercise = await Exercise.create({
+            name,
+            type,
+            description,
+            image, // Guarda la imagen en la base de datos como un BLOB
         });
-        return res.json("Exercise created successfully");
+
+        return res.json({ message: 'Exercise created successfully', exercise: newExercise });
     } catch (error) {
         console.error(error);
-        return res.status(400).json("Error creating exercise");
+        return res.status(400).json({ error: 'Error creating exercise' });
     }
 });
 
+// Endpoint para obtener todos los ejercicios
 app.get('/exercise', async (req, res) => {
     try {
         const exercises = await Exercise.findAll();
-        res.json(exercises);
+
+        // Convierte la imagen en BLOB a Base64
+        const exercisesWithImages = exercises.map(exercise => {
+            const imageBase64 = exercise.image ? exercise.image.toString('base64') : null;
+            return {
+                ...exercise.toJSON(),
+                image: imageBase64, // Agrega la imagen en Base64
+            };
+        });
+
+        res.json(exercisesWithImages);
     } catch (error) {
         console.error('Error fetching exercises:', error);
         res.status(500).json({ message: 'Error fetching exercises' });
     }
 });
+
+
+// ---------- FINISH EXERCISE
 
 app.post('/goal', async (req, res) => {
     const userId = req.body.userId;
