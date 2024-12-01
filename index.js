@@ -1,8 +1,12 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const path = require('path');
 const db = require('./src/main/backend/utils/database');
-const session = require('express-session')
+const session = require('express-session');
+const nodemailer = require('nodemailer');
+
 
 //-----------------ROUTES------------------
 const logins = require('./src/main/backend/routes/login');
@@ -23,7 +27,13 @@ const userHistoryRoutes = require('./src/main/backend/routes/userHistory');
 
 const cors = require('cors');
 
-app.use(cors({origin: 'http://localhost:3000'}));
+app.use(cors({
+    origin: ['http://localhost:3000', 'https://trackinesis.vercel.app'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
 app.use(express.json());
 app.use(session({
     secret: 'secret',
@@ -31,7 +41,8 @@ app.use(session({
         sameSite: 'strict',
     }
 }));
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
+
 
   //const randomInt = Math.floor(Math.random()*100000);
 
@@ -402,6 +413,7 @@ app.post('/createroutine', async (req, res) => {
     if (!userId) {
         return res.status(400).json({ message: 'User ID is required' });
     }
+
     try {
         const routine = await Routine.create({
             name: req.body.name,
@@ -411,13 +423,78 @@ app.post('/createroutine', async (req, res) => {
             state: req.body.state,
             userId: userId
         });
+
+        if (routine.state === 'private') {
+            console.log('Routine is private, no emails will be sent.');
+            return res.json({ id: routine.routineId });
+        }
+
+        const friends = await Friend.findAll({
+            where: { userId: userId }
+        });
+
+        if (friends.length === 0) {
+            console.log('No friends to notify');
+            return res.json({ id: routine.routineId });
+        }
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASSWORD
+            }
+        });
+
+        const user = await Signup.findOne({
+            where: { userId: userId }
+        });
+
+        if (!user || !user.email) {
+            console.error('User email not found');
+            return res.status(404).json({ message: 'User email not found' });
+        }
+
+        for (let friend of friends) {
+            const friendUser = await Signup.findOne({
+                where: { userId: friend.followedId }
+            });
+
+            if (friendUser && friendUser.email) {
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: friendUser.email,
+                    subject: `💪 New Routine Created by ${user.name}! 🏋️`,
+                    html: `
+                            <div style="font-family: 'Roboto', sans-serif; text-align: center; color: #11203D; padding: 20px; background-color: #f5f7fa; border-radius: 10px;">
+                                <h1 style="color: #11203D; font-size: 28px; margin-bottom: 20px;">Your Friend Just Created a New Routine!</h1>
+                                <p style="font-size: 18px; line-height: 1.5;">
+                                    Hi <strong>${friendUser.name}</strong>,<br><br>
+                                    Great news! Your friend <strong>${user.name}</strong> just created a new routine in <strong>Trackinesis</strong>. 💪
+                                </p>
+                                <p style="font-size: 16px; line-height: 1.5; margin: 20px 0;">
+                                    Check it out and stay motivated to reach your fitness goals together. Keep pushing each other to greatness!
+                                </p>
+                                <footer style="font-size: 12px; color: #555;">
+                                    Let's crush those goals! 💪<br>
+                                    <strong>Trackinesis</strong>
+                                </footer>
+                            </div>
+                        `
+
+                };
+
+                await transporter.sendMail(mailOptions);
+                console.log(`Email sent to: ${friendUser.email}`);
+            }
+        }
+
         return res.json({ id: routine.routineId });
     } catch (error) {
         console.error(error);
-        return res.status(400).json(error);
+        return res.status(400).json({ message: 'Error creating routine or sending emails', error });
     }
 });
-
 
 app.get('/routine/get/:userId', async (req, res) => {
     const userId = req.params.userId;
@@ -648,20 +725,90 @@ app.post('/goal/:goalId', async (req, res) => {
 
 app.post('/friend/:userId', async (req, res) => {
     const { userId } = req.params;
-    const { friendId, name } = req.body.params;
+    const { friendId, followedName } = req.body;
+
+    if (!userId || !friendId || !followedName) {
+        return res.status(400).json({
+            message: "Missing required fields. Ensure userId, friendId, and followedName are provided."
+        });
+    }
 
     try {
         const newFriend = await Friend.create({
             followedId: friendId,
-            followedName: name,
+            followedName: followedName,
             userId: userId
         });
-        return res.status(201).json(newFriend);
+
+        const followedUser = await Signup.findOne({
+            where: { userId: friendId }
+        });
+
+        if (!followedUser || !followedUser.email) {
+            console.error("Followed user not found or email is missing.");
+            return res.status(404).json({
+                message: "Followed user's email not found"
+            });
+        }
+
+        const followerUser = await Signup.findOne({
+            where: { userId: userId }
+        });
+
+        if (!followerUser || !followerUser.name) {
+            console.error("Follower user not found or name is missing.");
+            return res.status(404).json({
+                message: "Follower user's name not found"
+            });
+        }
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASSWORD
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: followedUser.email,
+            subject: '💪 New Gym Partner Alert! 🏋️',
+            html: `
+                <div style="font-family: 'Roboto', sans-serif; text-align: center; color: #11203D; padding: 20px; background-color: #f5f7fa; border-radius: 10px;">
+                    <h1 style="color: #11203D; font-size: 28px; margin-bottom: 20px;">You Have a New Follower!</h1>
+                    <p style="font-size: 18px; line-height: 1.5;">
+                        Hi <strong>${followedUser.name}</strong>,<br><br>
+                        Great news! <strong>${followerUser.name}</strong> just started following you on <strong>Trackinesis</strong>. 💪
+                    </p>
+                    <p style="font-size: 16px; line-height: 1.5; margin: 20px 0;">
+                        Stay motivated and inspire each other to reach your fitness goals. Together, you're stronger!
+                    </p>
+                    <footer style="font-size: 12px; color: #555;">
+                        Keep pushing your limits! 💪<br>
+                        <strong>Trackinesis</strong>
+                    </footer>
+                </div>
+                 `
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log("Email sent successfully to:", followedUser.email);
+
+        return res.status(201).json({
+            message: "Friend added and notification sent successfully",
+            newFriend
+        });
     } catch (error) {
-        console.error(error);
-        return res.status(400).json({ message: "Error creating friend" });
+        console.error("Error creating friend or sending email:", error);
+
+        return res.status(500).json({
+            message: "An error occurred while adding friend and sending email",
+            error: error.message
+        });
     }
 });
+
 
 app.get('/friend/:userId', async (req, res) => {
     const userId = req.params.userId

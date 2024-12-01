@@ -1,12 +1,26 @@
-const Friend = require('../model/friend'); // Assuming your friend model
+const Friend = require('../model/friend');
+const User = require('../model/user');
+const {sendMail} = require("../service/emailService");
 
 exports.createFriend = async (req, res) => {
-  try {
-    const newFriend = await Friend.create(req.body);
-    res.status(201).json(newFriend);
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating friend', error });
-  }
+    const { followedId, followedName } = req.body;
+    try {
+        const newFriend = await Friend.create(req.body);
+
+        const followedUser = await User.findByPk(followedId);
+        if (followedUser) {
+            const recipientEmail = followedUser.email;
+            const subject = 'New Follower Notification';
+            const text = `${req.user.name || 'Someone'} is following you!`;
+
+            await sendMail(recipientEmail, subject, text);
+        }
+
+        res.status(201).json(newFriend);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error creating friend', error });
+    }
 };
 
 exports.getAllFriends = async (req, res) => {
