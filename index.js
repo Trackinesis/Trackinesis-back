@@ -250,7 +250,7 @@ app.post('/signupsteptwo/:userId', async (req, res) => {
             return res.status(404).json({ error: 'user not found' });
         }
 
-        const updatedStrengthRatio = userToUpdate.weight > 0
+        const strengthRatio = userToUpdate.weight > 0
             ? ((maxBench || userToUpdate.maxBench) + (maxSquat || userToUpdate.maxSquat) + (maxDeadLift || userToUpdate.maxDeadLift)) / userToUpdate.weight
             : 0;
         
@@ -258,11 +258,11 @@ app.post('/signupsteptwo/:userId', async (req, res) => {
             maxBench: maxBench || userToUpdate.maxBench,
             maxSquat: maxSquat || userToUpdate.maxSquat,
             maxDeadLift: maxDeadLift || userToUpdate.maxDeadLift,
-            strengthRatio: updatedStrengthRatio,
+            strengthRatio: strengthRatio,
         };
 
         await userToUpdate.update(updatedUser);
-        await UserHistory.create({userId, maxBench, maxSquat, maxDeadLift})
+        await UserHistory.create({userId, maxBench, maxSquat, maxDeadLift, strengthRatio})
 
         res.status(200).json({ message: 'User maxes updated successfully', updatedUser });
     } catch (error) {
