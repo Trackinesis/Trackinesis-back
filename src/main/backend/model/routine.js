@@ -1,6 +1,8 @@
 const { DataTypes } = require('sequelize');
 const db = require('../utils/database');
 const PlanRoutine = require("./planRoutine");
+const Plan = require("./plan");
+
 
 const Routine = db.define('routine', {
     routineId: {
@@ -24,13 +26,13 @@ const Routine = db.define('routine', {
     description: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    state: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 }, {
     freezeTableName: true
 });
-
-Routine.associate = model => {
-    Routine.hasMany(model.planRoutine, { foreignKey: 'routineId' });
-}
 
 module.exports = Routine;

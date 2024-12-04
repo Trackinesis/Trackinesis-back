@@ -6,8 +6,6 @@ const expirationTime = '1h';
 
 exports.createUser = async (req, res) => {
     const {name, surname, email, password} = req.body;
-    // casteas a createUserDto
-    // pasar a userService
     let existingUser = await Signup.findOne({
         where: {email}
     });

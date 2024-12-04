@@ -27,12 +27,12 @@ const User = db.define('user', {
         type: DataTypes.INTEGER,
         allowNull: true,
     },
-    maxDeadlift: {
+    maxDeadLift: {
         type: DataTypes.INTEGER,
         allowNull: true,
 
     },
-    strenghtRatio: {
+    strengthRatio: {
         type: DataTypes.FLOAT,
         allowNull: true,
     }

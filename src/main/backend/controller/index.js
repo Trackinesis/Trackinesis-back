@@ -12,5 +12,6 @@ controller.routine = require('./routine')
 controller.routineExercise = require('./routineExercise')
 controller.exercise = require('./exercise');
 controller.token = require('./token')
+controller.userHistory = require('./userHistory')
 
 module.exports = controller;
