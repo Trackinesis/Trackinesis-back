@@ -14,8 +14,7 @@ const Friend = db.define('friend', {
     },
     followedName: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     }
 }, {
     freezeTableName: true

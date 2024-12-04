@@ -308,11 +308,12 @@ app.get('/home/:userId', async (req, res) => {
       console.error('Error fetching user data:', error);
       res.status(500).json({ message: 'Error fetching user data' });
     }
-});  
+});
 
 app.post('/plan', async (req, res) => {
-    const userId = req.body.userId
+    const userId = req.body.userId;
     try {
+        // Crear el plan
         const plan = await Plan.create({
             name: req.body.name,
             type: req.body.type,
@@ -322,10 +323,74 @@ app.post('/plan', async (req, res) => {
             endDate: req.body.endDate,
             userId: userId
         });
-        return res.json( {id: plan.planId});
+
+        // Obtener seguidores (usuarios que siguen al creador del plan)
+        const followers = await Friend.findAll({
+            where: { followedId: userId }
+        });
+
+        if (followers.length === 0) {
+            console.log('No followers to notify');
+            return res.json({ id: plan.planId });
+        }
+
+        // Configuración del transporter de nodemailer
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASSWORD
+            }
+        });
+
+        // Obtener información del usuario que creó el plan
+        const user = await Signup.findOne({
+            where: { userId: userId }
+        });
+
+        if (!user || !user.name) {
+            console.error('User name not found');
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Notificar a cada seguidor
+        for (let follower of followers) {
+            const followerUser = await Signup.findOne({
+                where: { userId: follower.userId }
+            });
+
+            if (followerUser && followerUser.email) {
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: followerUser.email,
+                    subject: `💪 New Plan Created by ${user.name}! 🏋️`,
+                    html: `
+                        <div style="font-family: 'Roboto', sans-serif; text-align: center; color: #11203D; padding: 20px; background-color: #f5f7fa; border-radius: 10px;">
+                            <h1 style="color: #11203D; font-size: 28px; margin-bottom: 20px;">Your Friend Just Created a New Plan!</h1>
+                            <p style="font-size: 18px; line-height: 1.5;">
+                                Hi <strong>${followerUser.name}</strong>,<br><br>
+                                Great news! Your friend <strong>${user.name}</strong> just created a new plan in <strong>Trackinesis</strong>. 💪
+                            </p>
+                            <p style="font-size: 16px; line-height: 1.5; margin: 20px 0;">
+                                Check it out and stay motivated to reach your fitness goals together. Keep pushing each other to greatness!
+                            </p>
+                            <footer style="font-size: 12px; color: #555;">
+                                Let's crush those goals! 💪<br>
+                                <strong>Trackinesis</strong>
+                            </footer>
+                        </div>
+                    `
+                };
+
+                await transporter.sendMail(mailOptions);
+                console.log(`Email sent to: ${followerUser.email}`);
+            }
+        }
+
+        return res.json({ id: plan.planId });
     } catch (error) {
-        console.error(error);
-        return res.status(400).json(error);
+        console.error('Error:', error);
+        return res.status(500).json({ message: 'An error occurred', error: error.message });
     }
 });
 
@@ -429,11 +494,11 @@ app.post('/createroutine', async (req, res) => {
             return res.json({ id: routine.routineId });
         }
 
-        const friends = await Friend.findAll({
-            where: { userId: userId }
+        const followers = await Friend.findAll({
+            where: { followedId: userId }
         });
 
-        if (friends.length === 0) {
+        if (followers.length === 0) {
             console.log('No friends to notify');
             return res.json({ id: routine.routineId });
         }
@@ -455,9 +520,9 @@ app.post('/createroutine', async (req, res) => {
             return res.status(404).json({ message: 'User email not found' });
         }
 
-        for (let friend of friends) {
+        for (let follower of followers) {
             const friendUser = await Signup.findOne({
-                where: { userId: friend.followedId }
+                where: { userId: follower.userId }
             });
 
             if (friendUser && friendUser.email) {
