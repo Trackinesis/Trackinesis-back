@@ -746,6 +746,26 @@ app.get('/exercise', async (req, res) => {
     }
 });
 
+app.get('/exercise/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const exercise = await Exercise.findByPk(id);
+
+        if (!exercise) {
+            return res.status(404).json({ message: 'Exercise not found' });
+        }
+
+        // Convierte la imagen en BLOB a Base64 si existe
+        const imageBase64 = exercise.image ? exercise.image.toString('base64') : null;
+
+        res.json({ image: imageBase64 });
+    } catch (error) {
+        console.error('Error fetching exercise image:', error);
+        res.status(500).json({ message: 'Error fetching exercise image' });
+    }
+});
+
+
 
 // ---------- FINISH EXERCISE
 
